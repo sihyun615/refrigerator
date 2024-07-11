@@ -1,6 +1,5 @@
 package com.sparta.refrigerator.column.dto;
 
-import com.sparta.refrigerator.column.entity.StatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,13 +7,15 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ColumnResponseDto {
-    private StatusEnum status;
+    private String columnName;
+    private Long columnIndex;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
     @Builder
-    public ColumnResponseDto(StatusEnum status, LocalDateTime createdAt, LocalDateTime modifiedAt) {
-        this.status = status;
+    public ColumnResponseDto(String columnName,Long columnIndex, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+        this.columnName=columnName;
+        this.columnIndex=columnIndex;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }

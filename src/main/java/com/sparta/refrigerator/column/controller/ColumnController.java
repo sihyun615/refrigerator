@@ -1,8 +1,8 @@
 package com.sparta.refrigerator.column.controller;
 
 import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
+import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnResponseDto;
-import com.sparta.refrigerator.column.entity.StatusEnum;
 import com.sparta.refrigerator.column.service.ColumnService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
@@ -18,9 +18,9 @@ public class ColumnController {
 
     @PostMapping("/admin/boards/{boardId}/columns")
     public StatusCommonResponse addColumn(@PathVariable(name = "boardId") Long boardId,
-                                          @RequestBody StatusEnum statusEnum,
+                                          @RequestBody ColumnRequestDto requestDto,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails){
-        columnService.addColumn(boardId,statusEnum,userDetails.getUser());
+        columnService.addColumn(boardId,requestDto,userDetails.getUser());
         return new StatusCommonResponse(201,"컬럼 추가되었습니다.");
     }
 

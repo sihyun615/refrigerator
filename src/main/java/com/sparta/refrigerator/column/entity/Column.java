@@ -2,6 +2,7 @@ package com.sparta.refrigerator.column.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,8 +16,9 @@ public class Column extends TimeStamp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @jakarta.persistence.Column(name = "column_name", nullable = false)
-    @Enumerated(value = EnumType.ORDINAL)
-    private StatusEnum status;
+    private String columnName;
+    @jakarta.persistence.Column(name = "column_index",nullable = false,unique = true)
+    private Long columnIndex;
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
@@ -24,9 +26,10 @@ public class Column extends TimeStamp {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Column(Board board, StatusEnum statusEnum, User user) {
+    public Column(Board board, ColumnRequestDto requestDto, User user,Long maxIndex) {
         this.board=board;
         this.user=user;
-        this.status=statusEnum;
+        this.columnName=requestDto.getColumnName();
+        this.columnIndex=maxIndex;
     }
 }

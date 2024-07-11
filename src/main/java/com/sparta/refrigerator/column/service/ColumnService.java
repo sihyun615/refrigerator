@@ -5,9 +5,9 @@ import com.sparta.refrigerator.auth.enumeration.UserAuth;
 import com.sparta.refrigerator.auth.service.UserService;
 import com.sparta.refrigerator.board.entity.Board;
 import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
+import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnResponseDto;
 import com.sparta.refrigerator.column.entity.Column;
-import com.sparta.refrigerator.column.entity.StatusEnum;
 import com.sparta.refrigerator.column.repository.ColumnRepository;
 import com.sparta.refrigerator.exception.BadRequestException;
 import com.sparta.refrigerator.exception.ConflictException;
@@ -23,7 +23,7 @@ public class ColumnService {
     private BoardService boardService;
     private UserService userService;
 
-    public void addColumn(Long boardId, StatusEnum statusEnum, User user) {
+    public void addColumn(Long boardId, ColumnRequestDto requestDto, User user) {
         Board checkBoard = boardService.findById(boardId);
         User checkUser = userService.findById(user.getId());
 
@@ -33,11 +33,15 @@ public class ColumnService {
         }
 
         // 이미 존재하는 컬럼인지 확인
-        if(columnRepository.findByStatus(statusEnum).isPresent()){
+        if(columnRepository.findByColumnName(requestDto.getColumnName()).isPresent()){
             throw new ConflictException("이미 존재하는 컬럼 입니다.");
         }
 
-        Column column=new Column(checkBoard,statusEnum,checkUser);
+        // 컬럼 인덱스 최댓값 확인
+        Long maxIndex = columnRepository.findMaxColumnIndexByBoard(checkBoard);
+        maxIndex = (maxIndex == null) ? 1L : maxIndex + 1;
+
+        Column column=new Column(checkBoard,requestDto,checkUser,maxIndex);
         columnRepository.save(column);
     }
 
@@ -55,13 +59,14 @@ public class ColumnService {
 
     public List<ColumnResponseDto> getAllColumnsOrderByStatus(Long boardId) {
         Board checkBoard = boardService.findById(boardId);
-        List<Column> columnList = columnRepository.findAllByBoardOrderByStatus(checkBoard);
+        List<Column> columnList = columnRepository.findAllByBoardOrderByColumnIndex(checkBoard);
 
         List<ColumnResponseDto> responseDtos = new ArrayList<>();
 
         for (Column column : columnList) {
             ColumnResponseDto responseDto = ColumnResponseDto.builder()
-                    .status(column.getStatus())
+                    .columnName(column.getColumnName())
+                    .columnIndex(column.getColumnIndex())
                     .createdAt(column.getCreatedAt())
                     .modifiedAt(column.getModifiedAt())
                     .build();
@@ -80,11 +85,6 @@ public class ColumnService {
             throw new ForbiddenException("해당 컬럼을 생성한 ADMIN과 일치하지 않아 요청을 처리할 수 없습니다.");
         }
 
-        // 컬럼 index 순서대로 먼저 정렬
-        List<Column> columnList = columnRepository.findAllByOrderByColumnIndex();
-        if(requestDto.getColumnIndex()>columnList.size()){
-
-        }
     }
 
     public Column findById(Long columnId) {
