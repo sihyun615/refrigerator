@@ -16,7 +16,7 @@ import java.util.List;
 public class ColumnController {
     private ColumnService columnService;
 
-    @PostMapping("admin/boards/{boardId}/columns")
+    @PostMapping("/admin/boards/{boardId}/columns")
     public StatusCommonResponse addColumn(@PathVariable(name = "boardId") Long boardId,
                                           @RequestBody StatusEnum statusEnum,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails){
@@ -24,7 +24,7 @@ public class ColumnController {
         return new StatusCommonResponse(201,"컬럼 추가되었습니다.");
     }
 
-    @DeleteMapping("admin/columns/{columnId}")
+    @DeleteMapping("/admin/columns/{columnId}")
     public StatusCommonResponse deleteColumn(@PathVariable(name = "columnId") Long columnId,
                                              @AuthenticationPrincipal UserDetailsImpl userDetails){
         columnService.deleteColumn(columnId,userDetails.getUser());
@@ -33,12 +33,12 @@ public class ColumnController {
 
     @GetMapping("/boards/{boardId}/columns")
     public DataCommonResponse<List<ColumnResponseDto>> getAllColumns(@PathVariable(name = "boardId") Long boardId) {
-        List<ColumnResponseDto> columns = columnService.getAllColumns(boardId);
+        List<ColumnResponseDto> columns = columnService.getAllColumnsOrderByStatus(boardId);
         return new DataCommonResponse<>(200, "컬럼 전체 조회 성공하였습니다.", columns);
     }
 
 
-    @PutMapping("admin/columns/{columnId}/transfer")
+    @PutMapping("/admin/columns/{columnId}/transfer")
     public StatusCommonResponse moveColumn(@PathVariable(name = "columnId") Long columnId,
                                            @RequestBody ColumnMoveRequestDto requestDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails){

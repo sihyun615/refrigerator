@@ -53,9 +53,9 @@ public class ColumnService {
         columnRepository.delete(checkColumn);
     }
 
-    public List<ColumnResponseDto> getAllColumns(Long boardId) {
+    public List<ColumnResponseDto> getAllColumnsOrderByStatus(Long boardId) {
         Board checkBoard = boardService.findById(boardId);
-        List<Column> columnList = columnRepository.findAllByBoard(checkBoard);
+        List<Column> columnList = columnRepository.findAllByBoardOrderByStatus(checkBoard);
 
         List<ColumnResponseDto> responseDtos = new ArrayList<>();
 

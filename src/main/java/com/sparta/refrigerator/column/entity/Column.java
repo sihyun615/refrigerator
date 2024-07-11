@@ -15,7 +15,7 @@ public class Column extends TimeStamp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @jakarta.persistence.Column(name = "column_name", nullable = false)
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(value = EnumType.ORDINAL)
     private StatusEnum status;
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)

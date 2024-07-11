@@ -1,17 +1,17 @@
 package com.sparta.refrigerator.column.entity;
 
 public enum StatusEnum {
-    STORED("Stored"),
-    IN_USE("In Use"),
-    USED("Used");
+    STORED(1L),
+    IN_USE(2L),
+    USED(3L);
 
-    private final String status;
+    private final Long status;
 
-    StatusEnum(String status) {
+    StatusEnum(Long status) {
         this.status = status;
     }
 
-    public String getStatus() {
+    public Long getStatus() {
         return status;
     }
 }
