@@ -2,6 +2,7 @@ package com.sparta.refrigerator.column.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,4 +25,10 @@ public class Column extends TimeStamp {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Column(Board board, ColumnRequestDto requestDto, User user) {
+        this.board=board;
+        this.user=user;
+        this.columnName= requestDto.getColumnName();
+    }
 }
