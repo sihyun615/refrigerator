@@ -38,9 +38,10 @@ public class Board extends TimeStamp {
     public Board(BoardRequestDTO requestDTO) {
         this.boardName = requestDTO.getBoardName();
         this.boardInfo = requestDTO.getBoardInfo();
+        this.user = user;
     }
 
-    public void updateBoard(BoardRequestDTO requestDTO) {
+    public void update(BoardRequestDTO requestDTO) {
         this.boardName = requestDTO.getBoardName();
         this.boardInfo = requestDTO.getBoardInfo();
     }
