@@ -35,6 +35,9 @@ public class BoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(
             () -> new DataNotFoundException("선택한 게시물이 없습니다."));
 
+        userRepository.findById(user.userId()).orElseThrow(
+            () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
+
         if (!board.getUser().getRole().equals(user.getRole())) {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
         }
