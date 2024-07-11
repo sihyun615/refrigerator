@@ -1,5 +1,5 @@
 package com.sparta.refrigerator.auth.entity;
 
-public class c {
+public class User {
 
 }
