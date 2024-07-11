@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ColumnRepository extends JpaRepository<Column,Long> {
+public interface ColumnRepository extends JpaRepository<Column, Long> {
+
     Optional<Object> findByColumnName(String columnName);
 
     List<Column> findAllByBoardOrderByColumnIndex(Board board);

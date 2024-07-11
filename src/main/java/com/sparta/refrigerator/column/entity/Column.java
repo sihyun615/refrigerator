@@ -13,12 +13,13 @@ import lombok.RequiredArgsConstructor;
 @Table(name = "columns")
 @RequiredArgsConstructor
 public class Column extends TimeStamp {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @jakarta.persistence.Column(name = "column_name", nullable = false)
     private String columnName;
-    @jakarta.persistence.Column(name = "column_index",nullable = false,unique = true)
+    @jakarta.persistence.Column(name = "column_index", nullable = false, unique = true)
     private Long columnIndex;
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)
@@ -27,14 +28,14 @@ public class Column extends TimeStamp {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Column(Board board, ColumnRequestDto requestDto, User user,Long maxIndex) {
-        this.board=board;
-        this.user=user;
-        this.columnName=requestDto.getColumnName();
-        this.columnIndex=maxIndex;
+    public Column(Board board, ColumnRequestDto requestDto, User user, Long maxIndex) {
+        this.board = board;
+        this.user = user;
+        this.columnName = requestDto.getColumnName();
+        this.columnIndex = maxIndex;
     }
 
     public void updateIndex(long index) {
-        this.columnIndex=index;
+        this.columnIndex = index;
     }
 }

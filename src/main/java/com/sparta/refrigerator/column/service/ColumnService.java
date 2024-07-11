@@ -21,6 +21,7 @@ import java.util.List;
 
 @Service
 public class ColumnService {
+
     private ColumnRepository columnRepository;
     private BoardService boardService;
     private UserService userService;
@@ -31,12 +32,12 @@ public class ColumnService {
         User checkUser = userService.findById(user.getId());
 
         // 컬럼 생성은 ADMIN만 할 수 있음 - 권한 제한
-        if(checkUser.getUserAuth().equals(UserAuth.USER)){
+        if (checkUser.getUserAuth().equals(UserAuth.USER)) {
             throw new ForbiddenException("ADMIN 사용자만이 컬럼을 추가할 수 있습니다.");
         }
 
         // 이미 존재하는 컬럼인지 확인
-        if(columnRepository.findByColumnName(requestDto.getColumnName()).isPresent()){
+        if (columnRepository.findByColumnName(requestDto.getColumnName()).isPresent()) {
             throw new ConflictException("이미 존재하는 컬럼 입니다.");
         }
 
@@ -44,17 +45,17 @@ public class ColumnService {
         Long maxIndex = columnRepository.findMaxColumnIndexByBoard(checkBoard);
         maxIndex = (maxIndex == null) ? 1L : maxIndex + 1;
 
-        Column column=new Column(checkBoard,requestDto,checkUser,maxIndex);
+        Column column = new Column(checkBoard, requestDto, checkUser, maxIndex);
         columnRepository.save(column);
     }
 
     @Transactional
-    public void deleteColumn(Long columnId, User user){
+    public void deleteColumn(Long columnId, User user) {
         Column checkColumn = findById(columnId);
         User checkUser = userService.findById(user.getId());
 
         // 해당 컬럼을 생성한 ADMIN만이 삭제 가능
-        if(!checkColumn.getUser().getId().equals(checkUser.getId())){
+        if (!checkColumn.getUser().getId().equals(checkUser.getId())) {
             throw new ForbiddenException("해당 컬럼을 생성한 ADMIN과 일치하지 않아 요청을 처리할 수 없습니다.");
         }
 
@@ -70,11 +71,11 @@ public class ColumnService {
 
         for (Column column : columnList) {
             ColumnResponseDto responseDto = ColumnResponseDto.builder()
-                    .columnName(column.getColumnName())
-                    .columnIndex(column.getColumnIndex())
-                    .createdAt(column.getCreatedAt())
-                    .modifiedAt(column.getModifiedAt())
-                    .build();
+                .columnName(column.getColumnName())
+                .columnIndex(column.getColumnIndex())
+                .createdAt(column.getCreatedAt())
+                .modifiedAt(column.getModifiedAt())
+                .build();
 
             responseDtos.add(responseDto);
         }
@@ -82,7 +83,8 @@ public class ColumnService {
     }
 
     @Transactional
-    public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto, User user) {
+    public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto,
+        User user) {
         Board checkBoard = boardService.findById(boardId);
         Column checkColumn = findById(columnId);
         User checkUser = userService.findById(user.getId());
@@ -138,7 +140,7 @@ public class ColumnService {
     @Transactional(readOnly = true)
     public Column findById(Long columnId) {
         return columnRepository.findById(columnId).orElseThrow(
-                () -> new BadRequestException("해당 컬럼아이디가 존재하지 않습니다.")
+            () -> new BadRequestException("해당 컬럼아이디가 존재하지 않습니다.")
         );
     }
 }
