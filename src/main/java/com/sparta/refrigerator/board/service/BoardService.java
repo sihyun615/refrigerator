@@ -100,8 +100,8 @@ public class BoardService {
     }
 
     //Board 전체 조회
-    public Page<BoardResponseDTO> viewAllBoard(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
         Page<Board> boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         if (boardPage.isEmpty()) {
