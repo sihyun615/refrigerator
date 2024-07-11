@@ -10,8 +10,11 @@ import com.sparta.refrigerator.board.repository.InvitationRepository;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
 import com.sparta.refrigerator.exception.ViolatedException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,5 +89,25 @@ public class BoardService {
 
         Invitation invitation = new Invitation(board, invitee);
         invitationRepository.save(invitation);
+    }
+
+    //Board 단건 조회
+    public BoardResponseDTO viewBoard(Long boardId) {
+        return boardRepository.findById(boardId)
+            .map(BoardResponseDTO::new)
+            .orElseThrow(() -> new DataNotFoundException("선택한 게시물이 없습니다."));
+
+    }
+
+    //Board 전체 조회
+    public Page<BoardResponseDTO> viewAllBoard(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Board> boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
+
+        if (boardPage.isEmpty()) {
+            throw new DataNotFoundException("먼저 작성하여 소식을 알려보세요!");
+        }
+
+        return boardPage.map(BoardResponseDTO::new);
     }
 }
