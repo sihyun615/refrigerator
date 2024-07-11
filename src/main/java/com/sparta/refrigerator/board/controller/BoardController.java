@@ -4,6 +4,7 @@ import com.sparta.refrigerator.board.dto.BoardRequestDTO;
 import com.sparta.refrigerator.board.dto.BoardResponseDTO;
 import com.sparta.refrigerator.board.service.BoardService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
+import com.sparta.refrigerator.common.response.StatusCommonResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,15 @@ public class BoardController {
         DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(200,
             "보드 수정이 완료 되었습니다.", board);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
+    //Board 삭제
+    @DeleteMapping("/admin/boards/{boardId}")
+    public ResponseEntity<StatusCommonResponse> deleteBoard(
+        @PathVariable(value = "boardId") Long boardId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        boardService.deleteBoard(boardId, userDetails.getUser());
+        StatusCommonResponse response = new StatusCommonResponse(204,"보드 삭제되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
