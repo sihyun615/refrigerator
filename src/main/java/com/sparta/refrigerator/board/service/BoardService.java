@@ -2,11 +2,16 @@ package com.sparta.refrigerator.board.service;
 
 import com.sparta.refrigerator.board.dto.BoardRequestDTO;
 import com.sparta.refrigerator.board.dto.BoardResponseDTO;
+import com.sparta.refrigerator.board.dto.InvitationRequestDTO;
 import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.board.entity.Invitation;
 import com.sparta.refrigerator.board.repository.BoardRepository;
+import com.sparta.refrigerator.board.repository.InvitationRepository;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
+import com.sparta.refrigerator.exception.ViolatedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +22,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
+    private final InvitationRepository invitationRepository;
 
     //Board 생성
     public BoardResponseDTO createBoard(BoardRequestDTO requestDTO, User user) {
@@ -58,5 +64,27 @@ public class BoardService {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
         }
         boardRepository.delete(board);
+    }
+
+    //Board 초대
+    @Transactional
+    public void inviteBoard(Long boardId, User user , InvitationRequestDTO requestDTO) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+            () -> new DataNotFoundException("선택한 게시물이 없습니다."));
+
+        if (!user.getRole().equals(User.Role.MANAGER)) {
+            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
+        }
+
+        User invitee = userRepository.findByUsername(requestDTO.getUserName()).orElseThrow(
+            () -> new DataNotFoundException("초대할 사용자가 없습니다."));
+
+        boolean isAlreadyInvited = invitationRepository.existsByBoardAndUser(board, invitee);
+        if (isAlreadyInvited) {
+            throw new ViolatedException("이미 해당 보드에 초대된 사용자입니다.");
+        }
+
+        Invitation invitation = new Invitation(board, invitee);
+        invitationRepository.save(invitation);
     }
 }

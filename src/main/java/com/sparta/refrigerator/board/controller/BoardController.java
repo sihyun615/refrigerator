@@ -2,6 +2,7 @@ package com.sparta.refrigerator.board.controller;
 
 import com.sparta.refrigerator.board.dto.BoardRequestDTO;
 import com.sparta.refrigerator.board.dto.BoardResponseDTO;
+import com.sparta.refrigerator.board.dto.InvitationRequestDTO;
 import com.sparta.refrigerator.board.service.BoardService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
@@ -53,6 +54,20 @@ public class BoardController {
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         boardService.deleteBoard(boardId, userDetails.getUser());
         StatusCommonResponse response = new StatusCommonResponse(204,"보드 삭제되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    //Board 초대
+    @PostMapping("/admin/boards/{boardId}/invitation")
+    public ResponseEntity<DataCommonResponse<String>> inviteBoard(
+        @PathVariable(value = "boardId") Long boardId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
+        @RequestBody @Valid InvitationRequestDTO requestDTO){
+
+        boardService.inviteBoard(boardId, userDetails.getUser(), requestDTO);
+        DataCommonResponse<String> response = new DataCommonResponse<>(200, "보드 초대가 완료었습니다.",
+            "초대 성공");
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
