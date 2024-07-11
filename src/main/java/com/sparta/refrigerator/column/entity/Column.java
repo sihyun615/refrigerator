@@ -2,6 +2,7 @@ package com.sparta.refrigerator.column.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.*;
@@ -31,5 +32,9 @@ public class Column extends TimeStamp {
         this.user=user;
         this.columnName=requestDto.getColumnName();
         this.columnIndex=maxIndex;
+    }
+
+    public void updateIndex(long index) {
+        this.columnIndex=index;
     }
 }

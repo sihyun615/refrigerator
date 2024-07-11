@@ -38,11 +38,12 @@ public class ColumnController {
     }
 
 
-    @PutMapping("/admin/columns/{columnId}/transfer")
-    public StatusCommonResponse moveColumn(@PathVariable(name = "columnId") Long columnId,
-                                           @RequestBody ColumnMoveRequestDto requestDto,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails){
-        columnService.moveColumn(columnId,requestDto,userDetails.getUser());
+    @PutMapping("/admin/boards/{boardId}/columns/{columnId}/transfer")
+    public StatusCommonResponse moveColumn(@PathVariable(name = "boardId") Long boardId,
+                                           @PathVariable(name = "columnId") Long columnId,
+                                            @RequestBody ColumnMoveRequestDto requestDto,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails){
+        columnService.moveColumn(boardId,columnId,requestDto,userDetails.getUser());
         return new StatusCommonResponse(200,"컬럼 이동되었습니다.");
     }
 }
