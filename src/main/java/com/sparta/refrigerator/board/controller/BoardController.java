@@ -39,7 +39,7 @@ public class BoardController {
         @PathVariable(value = "boardId") Long boardId,
         @RequestBody @Valid BoardRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        BoardResponseDTO board = boardService.updateBoard(boardId, requestDTO, userDetails);
+        BoardResponseDTO board = boardService.updateBoard(boardId, requestDTO, userDetails.getUser());
         DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(200,
             "보드 수정이 완료 되었습니다.", board);
         return new ResponseEntity<>(response, HttpStatus.OK);
