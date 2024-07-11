@@ -24,7 +24,8 @@ public class BoardController {
     //Board 생성
     @PostMapping("/admin/board")
     public ResponseEntity<DataCommonResponse<BoardResponseDTO>> createBoard(
-        @RequestBody @Valid BoardRequestDTO requestDTO, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        @RequestBody @Valid BoardRequestDTO requestDTO,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         BoardResponseDTO board = boardService.createBoard(requestDTO, userDetails);
         DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(201, "보드 작성되었습니다.",
             board);
@@ -35,8 +36,9 @@ public class BoardController {
     @PutMapping("/admin/boards/{boardId}")
     public ResponseEntity<DataCommonResponse<BoardResponseDTO>> updateBoard(
         @PathVariable(value = "boardId") Long boardId,
-        @RequestBody @Valid BoardRequestDTO requestDTO) {
-        BoardResponseDTO board = boardService.updateBoard(boardId, requestDTO);
+        @RequestBody @Valid BoardRequestDTO requestDTO,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        BoardResponseDTO board = boardService.updateBoard(boardId, requestDTO, userDetails);
         DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(200,
             "보드 수정이 완료 되었습니다.", board);
         return new ResponseEntity<>(response, HttpStatus.OK);
