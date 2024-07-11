@@ -1,5 +1,6 @@
 package com.sparta.refrigerator.board.entity;
 
+import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +12,7 @@ import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Getter
-public class Invitation {
+public class Invitation extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
