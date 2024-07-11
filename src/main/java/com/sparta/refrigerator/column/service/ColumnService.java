@@ -14,6 +14,7 @@ import com.sparta.refrigerator.exception.ConflictException;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class ColumnService {
     private BoardService boardService;
     private UserService userService;
 
+    @Transactional
     public void addColumn(Long boardId, ColumnRequestDto requestDto, User user) {
         Board checkBoard = boardService.findById(boardId);
         User checkUser = userService.findById(user.getId());
@@ -46,6 +48,7 @@ public class ColumnService {
         columnRepository.save(column);
     }
 
+    @Transactional
     public void deleteColumn(Long columnId, User user){
         Column checkColumn = findById(columnId);
         User checkUser = userService.findById(user.getId());
@@ -58,7 +61,8 @@ public class ColumnService {
         columnRepository.delete(checkColumn);
     }
 
-    public List<ColumnResponseDto> getAllColumnsOrderByStatus(Long boardId) {
+    @Transactional(readOnly = true)
+    public List<ColumnResponseDto> getAllColumnsOrderByIndex(Long boardId) {
         Board checkBoard = boardService.findById(boardId);
         List<Column> columnList = columnRepository.findAllByBoardOrderByColumnIndex(checkBoard);
 
@@ -77,6 +81,7 @@ public class ColumnService {
         return responseDtos;
     }
 
+    @Transactional
     public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto, User user) {
         Board checkBoard = boardService.findById(boardId);
         Column checkColumn = findById(columnId);
@@ -129,7 +134,8 @@ public class ColumnService {
             columnRepository.save(column);
         }
     }
-    
+
+    @Transactional(readOnly = true)
     public Column findById(Long columnId) {
         return columnRepository.findById(columnId).orElseThrow(
                 () -> new BadRequestException("해당 컬럼아이디가 존재하지 않습니다.")

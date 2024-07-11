@@ -33,7 +33,7 @@ public class ColumnController {
 
     @GetMapping("/boards/{boardId}/columns")
     public DataCommonResponse<List<ColumnResponseDto>> getAllColumns(@PathVariable(name = "boardId") Long boardId) {
-        List<ColumnResponseDto> columns = columnService.getAllColumnsOrderByStatus(boardId);
+        List<ColumnResponseDto> columns = columnService.getAllColumnsOrderByIndex(boardId);
         return new DataCommonResponse<>(200, "컬럼 전체 조회 성공하였습니다.", columns);
     }
 
