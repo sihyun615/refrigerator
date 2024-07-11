@@ -41,8 +41,7 @@ public class BoardService {
     //Board 수정
     @Transactional
     public BoardResponseDTO updateBoard(Long boardId, BoardRequestDTO requestDTO, User user) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-            () -> new DataNotFoundException("선택한 게시물이 없습니다."));
+        Board board = findById(boardId);
 
         userRepository.findById(user.userId()).orElseThrow(
             () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
@@ -57,8 +56,7 @@ public class BoardService {
 
     //Board 삭제
     public void deleteBoard(Long boardId, User user) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-            () -> new DataNotFoundException("선택한 게시물이 없습니다."));
+        Board board = findById(boardId);
 
         userRepository.findById(user.userId()).orElseThrow(
             () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
@@ -71,9 +69,8 @@ public class BoardService {
 
     //Board 초대
     @Transactional
-    public void inviteBoard(Long boardId, User user , InvitationRequestDTO requestDTO) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-            () -> new DataNotFoundException("선택한 게시물이 없습니다."));
+    public void inviteBoard(Long boardId, User user, InvitationRequestDTO requestDTO) {
+        Board board = findById(boardId);
 
         if (!user.getRole().equals(User.Role.MANAGER)) {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
@@ -110,4 +107,12 @@ public class BoardService {
 
         return boardPage.map(BoardResponseDTO::new);
     }
+
+    @Transactional(readOnly = true)
+    public Board findById(Long boardId) {
+        return boardRepository.findById(boardId).orElseThrow(
+            () -> new DataNotFoundException("선택한 게시물이 없습니다.")
+        );
+    }
+
 }
