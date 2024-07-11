@@ -8,7 +8,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,9 +25,20 @@ public class BoardController {
     public ResponseEntity<DataCommonResponse<BoardResponseDTO>> createBoard(
         @RequestBody @Valid BoardRequestDTO requestDTO) {
         BoardResponseDTO board = boardService.createBoard(requestDTO);
-        DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(201, "보드 작성됬었습니다.",
+        DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(201, "보드 작성되었습니다.",
             board);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    //Board 수정
+    @PutMapping("/admin/boards/{boardId}")
+    public ResponseEntity<DataCommonResponse<BoardResponseDTO>> updateBoard(
+        @PathVariable(value = "boardId") Long boardId,
+        @RequestBody @Valid BoardRequestDTO requestDTO) {
+        BoardResponseDTO board = boardService.updateBoard(boardId, requestDTO);
+        DataCommonResponse<BoardResponseDTO> response = new DataCommonResponse<>(200,
+            "보드 수정이 완료 되었습니다.", board);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
+    }
 }
