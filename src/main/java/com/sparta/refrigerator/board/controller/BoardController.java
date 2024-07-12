@@ -72,7 +72,7 @@ public class BoardController {
         @RequestBody @Valid InvitationRequestDTO requestDTO) {
 
         boardService.inviteBoard(boardId, userDetails.getUser(), requestDTO);
-        DataCommonResponse<String> response = new DataCommonResponse<>(200, "보드 초대가 완료었습니다.",
+        DataCommonResponse<String> response = new DataCommonResponse<>(200, "보드 초대가 완료되었습니다.",
             "초대 성공");
 
         return new ResponseEntity<>(response, HttpStatus.OK);
