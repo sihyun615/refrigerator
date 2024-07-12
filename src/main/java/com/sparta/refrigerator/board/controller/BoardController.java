@@ -31,7 +31,7 @@ public class BoardController {
     private final BoardService boardService;
 
     //Board 생성
-    @PostMapping("/admin/board")
+    @PostMapping("/admin/boards")
     public ResponseEntity<DataCommonResponse<BoardResponseDTO>> createBoard(
         @RequestBody @Valid BoardRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
