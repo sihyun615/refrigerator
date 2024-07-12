@@ -77,6 +77,12 @@ public class BoardService {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
         }
 
+        boolean isManagerOfBoard = invitationRepository.existsByBoardIdAndUserIdAndUserRole(boardId, user.getId(), User.Role.MANAGER);
+
+        if (!isManagerOfBoard) {
+            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
+        }
+
         User invitee = userRepository.findByUsername(requestDTO.getUserName()).orElseThrow(
             () -> new DataNotFoundException("초대할 사용자가 없습니다."));
 

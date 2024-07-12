@@ -7,11 +7,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Getter
+@NoArgsConstructor
+@Table(name = "invitaion")
 public class Invitation extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
