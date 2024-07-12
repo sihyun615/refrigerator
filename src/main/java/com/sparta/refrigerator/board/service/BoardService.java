@@ -55,6 +55,7 @@ public class BoardService {
     }
 
     //Board 삭제
+    @Transactional
     public void deleteBoard(Long boardId, User user) {
         Board board = findById(boardId);
 
@@ -89,6 +90,7 @@ public class BoardService {
     }
 
     //Board 단건 조회
+    @Transactional(readOnly = true)
     public BoardResponseDTO viewBoard(Long boardId) {
         return boardRepository.findById(boardId)
             .map(BoardResponseDTO::new)
@@ -97,6 +99,7 @@ public class BoardService {
     }
 
     //Board 전체 조회
+    @Transactional(readOnly = true)
     public Page<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Board> boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
