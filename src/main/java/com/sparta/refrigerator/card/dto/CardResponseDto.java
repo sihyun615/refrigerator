@@ -1,12 +1,12 @@
 package com.sparta.refrigerator.card.dto;
 
 import com.sparta.refrigerator.card.entity.Card;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 
 @Getter
 @NoArgsConstructor
@@ -18,7 +18,7 @@ public class CardResponseDto {
     private String title;
     private String content;
     private String collaborator;
-    private LocalDateTime deadline;
+    private LocalDate deadline;
 
     public CardResponseDto(Card card) {
         this.id = card.getId();
@@ -27,5 +27,4 @@ public class CardResponseDto {
         this.collaborator = card.getCollaborator();
         this.deadline = card.getDeadline();
     }
-
 }

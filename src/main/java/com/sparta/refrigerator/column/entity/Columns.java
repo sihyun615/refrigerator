@@ -43,4 +43,5 @@ public class Columns extends TimeStamp {
     public void updateIndex(long index) {
         this.columnIndex = index;
     }
+
 }
