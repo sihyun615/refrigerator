@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface InvitationRepository extends JpaRepository <Invitation, Long> {
     boolean existsByBoardAndUser(Board board, User user);
-    boolean existsByBoardIdAndUserIdAndUserRole(Long boardId, Long userId, UserAuth auth);
+    boolean existsByBoardIdAndUserIdAndUserRole(Long Board, Long User, UserAuth auth);
 }
