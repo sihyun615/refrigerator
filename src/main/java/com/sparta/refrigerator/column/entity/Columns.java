@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
+@Entity
 @Table(name = "columns")
 @RequiredArgsConstructor
 public class Columns extends TimeStamp {
