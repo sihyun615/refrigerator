@@ -1,5 +1,6 @@
 package com.sparta.refrigerator.board.entity;
 
+import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Getter
