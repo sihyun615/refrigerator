@@ -22,7 +22,7 @@
   </button>
   <div>
     <div class="login-id-label">아이디</div>
-    <input type="text" name="username" id="username" class="login-input-box">
+    <input type="text" name="userName" id="userName" class="login-input-box">
 
     <div class="login-id-label">비밀번호</div>
     <input type="password" name="password" id="password" class="login-input-box">
@@ -48,14 +48,14 @@
   const host = 'http://' + window.location.host;
 
   function onLogin() {
-    let username = $('#username').val();
+    let userName = $('#userName').val();
     let password = $('#password').val();
 
     $.ajax({
       type: "POST",
       url: `/users/login`,
       contentType: "application/json",
-      data: JSON.stringify({username: username, password: password}),
+      data: JSON.stringify({userName: userName, password: password}),
     })
     .done(function (res, status, xhr) {
       const token = xhr.getResponseHeader('Authorization');
