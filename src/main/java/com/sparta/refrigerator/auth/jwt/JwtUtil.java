@@ -15,6 +15,7 @@ import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -70,6 +71,14 @@ public class JwtUtil {
         return createToken(userName, userAuth, REFRESH_TOKEN_TIME);
     }
 
+    public ResponseCookie generateRefreshTokenCookie(String refreshToken) {
+        return ResponseCookie.from("refreshToken", refreshToken)
+            .httpOnly(true)
+            .maxAge(REFRESH_TOKEN_TIME / 1000)
+            .path("/")
+            .sameSite("Strict")
+            .build();
+    }
 
     public static String getJwtTokenFromHeader(HttpServletRequest request) {
         // 헤더에서 'Authorization'의 값을 가져온다.
@@ -89,15 +98,6 @@ public class JwtUtil {
             return true;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    public static Claims getUserInfoFromToken(String token) {
-        try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException e) {
-
-            return e.getClaims();
         }
     }
 
