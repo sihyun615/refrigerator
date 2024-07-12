@@ -49,7 +49,7 @@ public class ColumnService {
 
         // 컬럼 인덱스 최댓값 확인
         Long maxIndex = columnRepository.findMaxColumnIndexByBoard(checkBoard);
-        maxIndex = (maxIndex == null) ? 1L : maxIndex + 1;
+        maxIndex = (maxIndex == null) ? 0L : maxIndex + 1;
 
         Columns columns = new Columns(checkBoard, requestDto, checkUser, maxIndex);
         columnRepository.save(columns);
@@ -102,9 +102,6 @@ public class ColumnService {
         Long currentIndex = checkColumns.getColumnIndex();
         Long targetIndex = requestDto.getColumnIndex();
 
-        log.info(String.valueOf(currentIndex));
-        log.info(String.valueOf(targetIndex));
-
         // 현재 인덱스와 목표 인덱스가 같으면 아무 작업도 하지 않음
         if (currentIndex == targetIndex) {
             return;
@@ -137,7 +134,7 @@ public class ColumnService {
         columnsList.add(Math.toIntExact(targetIndex), columnsToMove);
 
         // 변경된 순서대로 모든 컬럼을 저장
-        for (int i = 1; i <= columnsList.size(); i++) {
+        for (int i = 0; i < columnsList.size(); i++) {
             Columns columns = columnsList.get(i);
             columns.updateIndex(i);
             columnRepository.save(columns);
