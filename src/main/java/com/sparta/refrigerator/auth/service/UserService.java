@@ -109,4 +109,8 @@ public class UserService {
     public boolean checkPassword(String requestPassword, String userPassword) {
         return passwordEncoder.matches(requestPassword, userPassword);
     }
+
+    public User findById(Long userId){
+        return userRepository.findById(userId).orElseThrow(()-> new DataNotFoundException("해당 사용자를 찾을 수 없습니다."));
+    }
 }
