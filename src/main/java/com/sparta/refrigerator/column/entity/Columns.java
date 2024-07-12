@@ -2,9 +2,12 @@ package com.sparta.refrigerator.column.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.card.entity.Card;
 import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +30,8 @@ public class Columns extends TimeStamp {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @OneToMany(mappedBy = "columns")
+    private List<Card> cardList=new ArrayList<>();
 
     public Columns(Board board, ColumnRequestDto requestDto, User user, Long maxIndex) {
         this.board = board;

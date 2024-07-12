@@ -1,9 +1,10 @@
 package com.sparta.refrigerator.card.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
+import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.common.TimeStamp;
-import com.sparta.refrigerator.column.entity.Column;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,9 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import javax.print.DocFlavor.STRING;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,8 +48,11 @@ public class Card extends TimeStamp {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "column_id", nullable = false)
-    private Column column;
+    private Columns columns;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
 
     public void update(String title, String content, String collaborator, LocalDateTime deadline) {
         this.title = title;

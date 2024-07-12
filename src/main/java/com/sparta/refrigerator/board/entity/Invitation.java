@@ -1,8 +1,12 @@
 package com.sparta.refrigerator.board.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
+import com.sparta.refrigerator.auth.enumeration.UserAuth;
 import com.sparta.refrigerator.common.TimeStamp;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,8 +34,13 @@ public class Invitation extends TimeStamp {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Invitation(Board board, User user) {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_auth", nullable = false)
+    private UserAuth auth;
+
+    public Invitation(Board board, User user,UserAuth auth) {
         this.board = board;
         this.user = user;
+        this.auth=auth;
     }
 }

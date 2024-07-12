@@ -29,9 +29,9 @@ import org.springframework.util.StringUtils;
 @Transactional
 public class UserService {
 
-    final private UserRepository userRepository;
-    final private PasswordEncoder passwordEncoder;
-    final private JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Value("${admin.token}")
     private String ADMIN_TOKEN;

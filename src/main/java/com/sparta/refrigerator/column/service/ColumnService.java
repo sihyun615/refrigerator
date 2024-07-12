@@ -14,6 +14,7 @@ import com.sparta.refrigerator.exception.BadRequestException;
 import com.sparta.refrigerator.exception.ConflictException;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,14 +22,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ColumnService {
 
-    private ColumnRepository columnRepository;
-    private BoardService boardService;
-    private UserService userService;
+    private final ColumnRepository columnRepository;
+    private final BoardService boardService;
+    private final UserService userService;
 
     @Transactional
     public void addColumn(Long boardId, ColumnRequestDto requestDto, User user) {
+
         Board checkBoard = boardService.findById(boardId);
         User checkUser = userService.findById(user.getId());
 
