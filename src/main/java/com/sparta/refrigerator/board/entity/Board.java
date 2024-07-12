@@ -46,8 +46,8 @@ public class Board extends TimeStamp {
     @OneToMany(mappedBy = "board")
     private List<Columns> columnsList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "board")
-//    private List<Card> cardList = new ArrayList<>();
+    @OneToMany(mappedBy = "board")
+    private List<Card> cardList = new ArrayList<>();
 
     public Board(BoardRequestDTO requestDTO, User user) {
         this.boardName = requestDTO.getBoardName();

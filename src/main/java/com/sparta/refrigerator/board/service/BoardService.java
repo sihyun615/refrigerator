@@ -16,7 +16,6 @@ import com.sparta.refrigerator.exception.ViolatedException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +51,7 @@ public class BoardService {
         userRepository.findById(user.getId()).orElseThrow(
             () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
 
-        checkIfManagerOfBoard(board,user);
+        checkIfManagerOfBoard(board, user);
 
         board.update(requestDTO);
         boardRepository.save(board);
@@ -67,7 +66,7 @@ public class BoardService {
         userRepository.findById(user.getId()).orElseThrow(
             () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
 
-        checkIfManagerOfBoard(board,user);
+        checkIfManagerOfBoard(board, user);
 
         boardRepository.delete(board);
     }
@@ -80,7 +79,7 @@ public class BoardService {
         User invitee = userRepository.findByUserName(requestDTO.getUserName()).orElseThrow(
             () -> new DataNotFoundException("초대할 사용자가 없습니다."));
 
-        checkIfManagerOfBoard(board,user);
+        checkIfManagerOfBoard(board, user);
 
         boolean isAlreadyInvited = invitationRepository.existsByBoardAndUser(board, invitee);
         if (isAlreadyInvited) {
