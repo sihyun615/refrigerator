@@ -8,8 +8,8 @@ import com.sparta.refrigerator.board.service.BoardService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +31,7 @@ public class BoardController {
     private final BoardService boardService;
 
     //Board 생성
-    @PostMapping("/admin/board")
+    @PostMapping("/admin/boards")
     public ResponseEntity<DataCommonResponse<BoardResponseDTO>> createBoard(
         @RequestBody @Valid BoardRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -90,11 +90,11 @@ public class BoardController {
 
     //Board 전체 조회
     @GetMapping("/boards")
-    public ResponseEntity<DataCommonResponse<Page<BoardResponseDTO>>> viewAllBoard(
+    public ResponseEntity<DataCommonResponse<List<BoardResponseDTO>>> viewAllBoard(
         @RequestParam(value = "page", defaultValue = "0") int page) {
-        Page<BoardResponseDTO> responseDTOPage = boardService.viewAllBoard(page, PAGE_SIZE);
-        DataCommonResponse<Page<BoardResponseDTO>> response = new DataCommonResponse<>(200,
-            "보드 전체 조회 성공하였습니다.", responseDTOPage);
+        List<BoardResponseDTO> responseDTOList = boardService.viewAllBoard(page, PAGE_SIZE);
+        DataCommonResponse<List<BoardResponseDTO>> response = new DataCommonResponse<>(200,
+            "보드 전체 조회 성공하였습니다.", responseDTOList);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }

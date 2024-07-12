@@ -13,6 +13,7 @@ import com.sparta.refrigerator.exception.ErrorCode;
 import com.sparta.refrigerator.exception.UnauthorizedException;
 import com.sparta.refrigerator.exception.UserException;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +84,20 @@ public class UserService {
 
     @Transactional
     public HttpHeaders refresh(HttpServletRequest request){
-        String tokenValue = request.getHeader("Refresh-Token");
+
+        Cookie[] cookies = request.getCookies();
+        String tokenValue = null;
+
+        if (cookies == null) {
+            throw new BadRequestException("잘못된 요청입니다.");
+        }
+
+        for (Cookie cookie : cookies) {
+            if ("refreshToken".equals(cookie.getName())) {
+                tokenValue = cookie.getValue();
+            }
+        }
+
         if (!StringUtils.hasText(tokenValue)) {
             throw new BadRequestException("잘못된 요청입니다.");
         }
@@ -98,11 +112,8 @@ public class UserService {
             throw new UnauthorizedException("토큰 검증 실패");
         }
         String accessToken = jwtUtil.createAccessToken(user.getUserName(), user.getAuth());
-        String refreshToken = jwtUtil.createRefreshToken(user.getUserName(), user.getAuth());
-        user.updateRefresh(refreshToken);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
-        headers.set("Refresh-Token", refreshToken);
         return headers;
     }
 

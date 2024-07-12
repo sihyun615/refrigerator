@@ -13,7 +13,8 @@ import com.sparta.refrigerator.board.repository.InvitationRepository;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
 import com.sparta.refrigerator.exception.ViolatedException;
-import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,8 @@ public class BoardService {
         if (user.getAuth() == UserAuth.MANAGER) {
             Board board = new Board(requestDTO, user);
             boardRepository.save(board);
+            Invitation invitation = new Invitation(board, user);
+            invitationRepository.save(invitation);
             return new BoardResponseDTO(board);
         } else {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
@@ -48,9 +51,8 @@ public class BoardService {
         userRepository.findById(user.getId()).orElseThrow(
             () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
 
-        if (!board.getUser().getAuth().equals(user.getAuth())) {
-            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
-        }
+        checkIfManagerOfBoard(board, user);
+
         board.update(requestDTO);
         boardRepository.save(board);
         return new BoardResponseDTO(board);
@@ -64,9 +66,8 @@ public class BoardService {
         userRepository.findById(user.getId()).orElseThrow(
             () -> new DataNotFoundException("선택한 유저를 찾을 수 없습니다."));
 
-        if (!board.getUser().getAuth().equals(user.getAuth())) {
-            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
-        }
+        checkIfManagerOfBoard(board, user);
+
         boardRepository.delete(board);
     }
 
@@ -75,18 +76,10 @@ public class BoardService {
     public void inviteBoard(Long boardId, User user, InvitationRequestDTO requestDTO) {
         Board board = findById(boardId);
 
-        if (!Objects.equals(user.getAuth(), "MANAGER")) {
-            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
-        }
-
-        boolean isManagerOfBoard = invitationRepository.existsByBoardAndUserAndAuth(board, user, UserAuth.MANAGER);
-
-        if (!isManagerOfBoard) {
-            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
-        }
-
         User invitee = userRepository.findByUserName(requestDTO.getUserName()).orElseThrow(
             () -> new DataNotFoundException("초대할 사용자가 없습니다."));
+
+        checkIfManagerOfBoard(board, user);
 
         boolean isAlreadyInvited = invitationRepository.existsByBoardAndUser(board, invitee);
         if (isAlreadyInvited) {
@@ -108,15 +101,15 @@ public class BoardService {
 
     //Board 전체 조회
     @Transactional(readOnly = true)
-    public Page<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
+    public List<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Board> boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         if (boardPage.isEmpty()) {
             throw new DataNotFoundException("먼저 작성하여 소식을 알려보세요!");
         }
-
-        return boardPage.map(BoardResponseDTO::new);
+        List<Board> boardList = boardPage.getContent();
+        return boardList.stream().map(BoardResponseDTO::new).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -124,6 +117,15 @@ public class BoardService {
         return boardRepository.findById(boardId).orElseThrow(
             () -> new DataNotFoundException("선택한 게시물이 없습니다.")
         );
+    }
+
+    private void checkIfManagerOfBoard(Board board, User user) {
+        boolean isManagerOfBoard = invitationRepository.existsByBoardAndUser(board, user);
+
+        if (!isManagerOfBoard) {
+            throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
+        }
+
     }
 
 }
