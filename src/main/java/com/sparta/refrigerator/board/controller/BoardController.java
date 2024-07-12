@@ -1,5 +1,6 @@
 package com.sparta.refrigerator.board.controller;
 
+import com.sparta.refrigerator.auth.service.UserDetailsImpl;
 import com.sparta.refrigerator.board.dto.BoardRequestDTO;
 import com.sparta.refrigerator.board.dto.BoardResponseDTO;
 import com.sparta.refrigerator.board.dto.InvitationRequestDTO;
@@ -7,7 +8,6 @@ import com.sparta.refrigerator.board.service.BoardService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

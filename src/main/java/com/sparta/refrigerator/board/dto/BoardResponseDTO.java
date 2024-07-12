@@ -15,5 +15,6 @@ public class BoardResponseDTO {
         this.boardName = board.getBoardName();
         this.boardInfo = board.getBoardInfo();
         this.userId = board.getUser().getId();
+
     }
 }
