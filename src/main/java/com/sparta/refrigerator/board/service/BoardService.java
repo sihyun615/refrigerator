@@ -86,7 +86,7 @@ public class BoardService {
             throw new ViolatedException("이미 해당 보드에 초대된 사용자입니다.");
         }
 
-        Invitation invitation = new Invitation(board, invitee, UserAuth.USER);
+        Invitation invitation = new Invitation(board, invitee);
         invitationRepository.save(invitation);
     }
 

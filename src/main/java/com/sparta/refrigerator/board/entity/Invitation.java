@@ -34,13 +34,8 @@ public class Invitation extends TimeStamp {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "user_auth", nullable = false)
-    private UserAuth auth;
-
-    public Invitation(Board board, User user,UserAuth auth) {
+    public Invitation(Board board, User user) {
         this.board = board;
         this.user = user;
-        this.auth=auth;
     }
 }
