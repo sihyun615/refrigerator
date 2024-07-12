@@ -32,7 +32,7 @@ public class BoardService {
     //Board 생성
     public BoardResponseDTO createBoard(BoardRequestDTO requestDTO, User user) {
         if (Objects.equals(user.getAuth(), "MANAGER")) {
-            Board board = new Board(requestDTO);
+            Board board = new Board(requestDTO, user);
             boardRepository.save(board);
             return new BoardResponseDTO(board);
         } else {
