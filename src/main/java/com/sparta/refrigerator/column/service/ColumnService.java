@@ -4,6 +4,7 @@ import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.auth.enumeration.UserAuth;
 import com.sparta.refrigerator.auth.service.UserService;
 import com.sparta.refrigerator.board.entity.Board;
+import com.sparta.refrigerator.board.service.BoardService;
 import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnResponseDto;
@@ -32,7 +33,7 @@ public class ColumnService {
         User checkUser = userService.findById(user.getId());
 
         // 컬럼 생성은 ADMIN만 할 수 있음 - 권한 제한
-        if (checkUser.getUserAuth().equals(UserAuth.USER)) {
+        if (checkUser.getAuth().equals(UserAuth.USER)) {
             throw new ForbiddenException("ADMIN 사용자만이 컬럼을 추가할 수 있습니다.");
         }
 
