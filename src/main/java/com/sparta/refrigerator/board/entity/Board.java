@@ -5,6 +5,7 @@ import com.sparta.refrigerator.board.dto.BoardRequestDTO;
 import com.sparta.refrigerator.card.entity.Card;
 import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.common.TimeStamp;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,13 +41,13 @@ public class Board extends TimeStamp {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Invitation> invitationList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Columns> columnsList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Card> cardList = new ArrayList<>();
 
     public Board(BoardRequestDTO requestDTO, User user) {
