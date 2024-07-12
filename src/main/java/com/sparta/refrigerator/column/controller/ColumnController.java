@@ -7,7 +7,6 @@ import com.sparta.refrigerator.column.dto.ColumnResponseDto;
 import com.sparta.refrigerator.column.service.ColumnService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

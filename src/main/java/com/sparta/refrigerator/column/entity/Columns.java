@@ -22,7 +22,7 @@ public class Columns extends TimeStamp {
     private Long id;
     @Column(name = "column_name", nullable = false)
     private String columnName;
-    @Column(name = "column_index", nullable = false, unique = true)
+    @Column(name = "column_index", nullable = false)
     private Long columnIndex;
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)

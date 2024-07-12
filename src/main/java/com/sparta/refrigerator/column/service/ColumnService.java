@@ -15,12 +15,14 @@ import com.sparta.refrigerator.exception.ConflictException;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ColumnService {
@@ -100,6 +102,9 @@ public class ColumnService {
         Long currentIndex = checkColumns.getColumnIndex();
         Long targetIndex = requestDto.getColumnIndex();
 
+        log.info(String.valueOf(currentIndex));
+        log.info(String.valueOf(targetIndex));
+
         // 현재 인덱스와 목표 인덱스가 같으면 아무 작업도 하지 않음
         if (currentIndex == targetIndex) {
             return;
@@ -108,7 +113,7 @@ public class ColumnService {
         // 모든 컬럼을 현재 보드에서 조회
         List<Columns> columnsList = columnRepository.findAllByBoardOrderByColumnIndex(checkBoard);
 
-        // 이동할 컬럼을 찾아서 목표 인덱스로 이동
+        // 이동할 컬럼을 찾기
         Columns columnsToMove = null;
         for (Columns columns : columnsList) {
             if (columns.getId().equals(columnId)) {
@@ -123,7 +128,7 @@ public class ColumnService {
         }
 
         // 목표 인덱스 범위 확인
-        if (targetIndex < 0 || targetIndex >= columnsList.size()) {
+        if (targetIndex < 0 || targetIndex > columnsList.size()) {
             throw new BadRequestException("목표 인덱스가 범위를 벗어납니다.");
         }
 
@@ -132,7 +137,7 @@ public class ColumnService {
         columnsList.add(Math.toIntExact(targetIndex), columnsToMove);
 
         // 변경된 순서대로 모든 컬럼을 저장
-        for (int i = 0; i < columnsList.size(); i++) {
+        for (int i = 1; i <= columnsList.size(); i++) {
             Columns columns = columnsList.get(i);
             columns.updateIndex(i);
             columnRepository.save(columns);
