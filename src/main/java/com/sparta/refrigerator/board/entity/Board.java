@@ -2,6 +2,8 @@ package com.sparta.refrigerator.board.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.dto.BoardRequestDTO;
+import com.sparta.refrigerator.card.entity.Card;
+import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,9 +41,15 @@ public class Board extends TimeStamp {
     private User user;
 
     @OneToMany(mappedBy = "board")
-    private List<Invitation> invitations = new ArrayList<>();
+    private List<Invitation> invitationList = new ArrayList<>();
 
-    public Board(BoardRequestDTO requestDTO) {
+    @OneToMany(mappedBy = "board")
+    private List<Columns> columnsList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "board")
+    private List<Card> cardList = new ArrayList<>();
+
+    public Board(BoardRequestDTO requestDTO, User user) {
         this.boardName = requestDTO.getBoardName();
         this.boardInfo = requestDTO.getBoardInfo();
         this.user = user;
