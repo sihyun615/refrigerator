@@ -73,8 +73,6 @@ public class ColumnService {
             ColumnResponseDto responseDto = ColumnResponseDto.builder()
                 .columnName(column.getColumnName())
                 .columnIndex(column.getColumnIndex())
-                .createdAt(column.getCreatedAt())
-                .modifiedAt(column.getModifiedAt())
                 .build();
 
             responseDtos.add(responseDto);
