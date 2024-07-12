@@ -29,9 +29,9 @@
 <div id="login-form">
   <div id="login-title">회원가입</div>
 
-  <form action="/api/user/signup" method="post">
+  <form action="/users/signup" method="post">
     <div class="login-id-label">Username</div>
-    <input type="text" name="username" placeholder="Username" class="login-input-box">
+    <input type="text" name="userName" placeholder="Username" class="login-input-box">
 
     <div class="login-id-label">Password</div>
     <input type="password" name="password" class="login-input-box">
@@ -40,7 +40,7 @@
       <input id="admin-check" type="checkbox" name="admin" onclick="onclickAdmin()" style="margin-top: 40px;">관리자
       <input id="admin-token" type="password" name="adminToken" placeholder="관리자 암호" class="login-input-box" style="display:none">
     </div>
-    <button id="login-id-submit">회원 가입</button>
+    <button id="login-id-submit" type="submit">회원 가입</button>
   </form>
 </div>
 </body>
