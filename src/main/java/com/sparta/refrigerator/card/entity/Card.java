@@ -1,10 +1,12 @@
 package com.sparta.refrigerator.card.entity;
 
+import com.sparta.refrigerator.comment.entity.Comment;
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.common.TimeStamp;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,9 +15,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.stream.events.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,6 +62,8 @@ public class Card extends TimeStamp {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> commentList = new ArrayList<>();
 
     public Card(CardRequestDto requestDto, Columns columns, User user, Board board) {
         this.title = requestDto.getTitle();
