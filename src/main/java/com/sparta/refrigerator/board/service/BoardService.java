@@ -15,6 +15,7 @@ import com.sparta.refrigerator.exception.ForbiddenException;
 import com.sparta.refrigerator.exception.ViolatedException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,7 @@ public class BoardService {
 
     //Board 생성
     public BoardResponseDTO createBoard(BoardRequestDTO requestDTO, User user) {
-        if (Objects.equals(user.getAuth(), "MANAGER")) {
+        if (user.getAuth() == UserAuth.MANAGER) {
             Board board = new Board(requestDTO, user);
             boardRepository.save(board);
             return new BoardResponseDTO(board);
