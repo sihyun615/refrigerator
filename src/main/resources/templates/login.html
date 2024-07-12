@@ -17,7 +17,7 @@
 <div id="login-form">
   <div id="login-title">냉장고를 부탁해</div>
 
-  <button id="login-id-btn" onclick="location.href='/api/user/signup'">
+  <button id="login-id-btn" onclick="location.href='/users/signup'">
     회원 가입
   </button>
   <div>
@@ -53,7 +53,7 @@
 
     $.ajax({
       type: "POST",
-      url: `/api/user/login`,
+      url: `/users/login`,
       contentType: "application/json",
       data: JSON.stringify({username: username, password: password}),
     })
