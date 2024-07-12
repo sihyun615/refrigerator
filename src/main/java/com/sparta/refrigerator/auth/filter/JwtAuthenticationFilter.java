@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         StatusCommonResponse commonResponse = new StatusCommonResponse(200, "로그인 성공");
 
         response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        response.addHeader("Refresh-Token", refreshToken);
+//        response.addHeader("Refresh-Token", refreshToken);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));

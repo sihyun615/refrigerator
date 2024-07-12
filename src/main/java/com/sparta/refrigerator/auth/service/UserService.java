@@ -2,6 +2,7 @@ package com.sparta.refrigerator.auth.service;
 
 import com.sparta.refrigerator.auth.dto.PasswordRequestDto;
 import com.sparta.refrigerator.auth.dto.SignupRequestDto;
+import com.sparta.refrigerator.auth.dto.TokenRequestDto;
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.auth.enumeration.UserAuth;
 import com.sparta.refrigerator.auth.jwt.JwtUtil;
@@ -82,8 +83,8 @@ public class UserService {
     }
 
     @Transactional
-    public HttpHeaders refresh(HttpServletRequest request){
-        String tokenValue = request.getHeader("Refresh-Token");
+    public HttpHeaders refresh(TokenRequestDto tokenRequestDto){
+        String tokenValue = tokenRequestDto.getRefreshToken();
         if (!StringUtils.hasText(tokenValue)) {
             throw new BadRequestException("잘못된 요청입니다.");
         }
@@ -98,11 +99,8 @@ public class UserService {
             throw new UnauthorizedException("토큰 검증 실패");
         }
         String accessToken = jwtUtil.createAccessToken(user.getUserName(), user.getAuth());
-        String refreshToken = jwtUtil.createRefreshToken(user.getUserName(), user.getAuth());
-        user.updateRefresh(refreshToken);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
-        headers.set("Refresh-Token", refreshToken);
         return headers;
     }
 
