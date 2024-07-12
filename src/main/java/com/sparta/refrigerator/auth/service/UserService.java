@@ -2,7 +2,6 @@ package com.sparta.refrigerator.auth.service;
 
 import com.sparta.refrigerator.auth.dto.PasswordRequestDto;
 import com.sparta.refrigerator.auth.dto.SignupRequestDto;
-import com.sparta.refrigerator.auth.dto.TokenRequestDto;
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.auth.enumeration.UserAuth;
 import com.sparta.refrigerator.auth.jwt.JwtUtil;
@@ -14,6 +13,7 @@ import com.sparta.refrigerator.exception.ErrorCode;
 import com.sparta.refrigerator.exception.UnauthorizedException;
 import com.sparta.refrigerator.exception.UserException;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -83,8 +83,21 @@ public class UserService {
     }
 
     @Transactional
-    public HttpHeaders refresh(TokenRequestDto tokenRequestDto){
-        String tokenValue = tokenRequestDto.getRefreshToken();
+    public HttpHeaders refresh(HttpServletRequest request){
+
+        Cookie[] cookies = request.getCookies();
+        String tokenValue = null;
+
+        if (cookies == null) {
+            throw new BadRequestException("잘못된 요청입니다.");
+        }
+
+        for (Cookie cookie : cookies) {
+            if ("refreshToken".equals(cookie.getName())) {
+                tokenValue = cookie.getValue();
+            }
+        }
+
         if (!StringUtils.hasText(tokenValue)) {
             throw new BadRequestException("잘못된 요청입니다.");
         }

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -77,6 +78,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String accessToken = jwtUtil.createAccessToken(userName, userAuth);
         String refreshToken = jwtUtil.createRefreshToken(userName, userAuth);
+        ResponseCookie refreshTokenCookie = jwtUtil.generateRefreshTokenCookie(refreshToken);
 
         user.get().updateRefresh(refreshToken);
         userRepository.save(user.get());
@@ -84,7 +86,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         StatusCommonResponse commonResponse = new StatusCommonResponse(200, "로그인 성공");
 
         response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-//        response.addHeader("Refresh-Token", refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
@@ -95,13 +97,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         responseSetting(response, 401, "아이디와 비밀번호가 일치하지 않습니다.");
     }
 
-    private void saveRefreshToken(String userName, String refresh) {
-        User user = userRepository.findByUserName(userName).orElseThrow(
-            () -> new IllegalArgumentException("not found user")
-        );
-        user.updateRefresh(refresh);
-        userRepository.save(user);
-    }
 
     private void responseSetting(HttpServletResponse response, int statusCode, String message) throws IOException {
         response.setStatus(statusCode);
