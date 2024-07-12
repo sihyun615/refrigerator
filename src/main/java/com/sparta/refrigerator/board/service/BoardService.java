@@ -79,7 +79,7 @@ public class BoardService {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
         }
 
-        boolean isManagerOfBoard = invitationRepository.existsByBoardIdAndUserIdAndUserRole(board.getId(), user.getId(), UserAuth.MANAGER);
+        boolean isManagerOfBoard = invitationRepository.existsByBoardAndUserAndAuth(board, user, UserAuth.MANAGER);
 
         if (!isManagerOfBoard) {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
