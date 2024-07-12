@@ -1,18 +1,24 @@
 package com.sparta.refrigerator.auth.enumeration;
 
+import lombok.Getter;
+
+@Getter
 public enum UserAuth {
     USER("USER"),
-    ADMIN("ADMIN");
+    MANAGER("MANAGER"),
+    ACTIVE("ACTIVE"),
+    WITHDRAW("WITHDRAW");
 
-    private final String status;
 
-    UserAuth(String status) {
-        this.status = status;
+    private final String auth;
+
+    UserAuth(String auth) {
+        this.auth = auth;
     }
 
     @Override
     public String toString() {
-        return this.status;
+        return this.auth;
     }
 
 }
