@@ -13,7 +13,9 @@ import com.sparta.refrigerator.board.repository.InvitationRepository;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import com.sparta.refrigerator.exception.ForbiddenException;
 import com.sparta.refrigerator.exception.ViolatedException;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -109,15 +111,15 @@ public class BoardService {
 
     //Board 전체 조회
     @Transactional(readOnly = true)
-    public Page<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
+    public List<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Board> boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         if (boardPage.isEmpty()) {
             throw new DataNotFoundException("먼저 작성하여 소식을 알려보세요!");
         }
-
-        return boardPage.map(BoardResponseDTO::new);
+        List<Board> boardList = boardPage.getContent();
+        return boardList.stream().map(BoardResponseDTO::new).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
