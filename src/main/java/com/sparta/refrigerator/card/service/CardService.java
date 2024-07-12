@@ -1,9 +1,12 @@
 package com.sparta.refrigerator.card.service;
 
+import com.sparta.refrigerator.auth.entity.User;
+import com.sparta.refrigerator.auth.service.UserService;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.card.dto.CardResponseDto;
 import com.sparta.refrigerator.card.entity.Card;
 import com.sparta.refrigerator.card.repository.CardRepository;
+import com.sparta.refrigerator.column.service.ColumnService;
 import com.sparta.refrigerator.exception.CardNotFoundException;
 import com.sparta.refrigerator.exception.DataNotFoundException;
 import java.util.List;
@@ -22,6 +25,11 @@ public class CardService {
 
     private final CardRepository cardRepository;
 
+    private final ColumnService columnService;
+
+    private final UserService userService;
+
+
     @Transactional
     public CardResponseDto createCard(CardRequestDto requestDto) {
 
@@ -39,38 +47,51 @@ public class CardService {
 
     @Transactional
     public CardResponseDto updateCard(Long cardId, CardRequestDto requestDto) {
-        Card card = cardRepository.findById(cardId).orElseThrow(() -> new CardNotFoundException("카드를 찾지 못했습니다"));
+        Card card = cardRepository.findById(cardId)
+            .orElseThrow(() -> new CardNotFoundException("해당 카드는 삭제되었거나 존재하지 않습니다."));
 
-        card.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getCollaborator(), requestDto.getDeadline());
+        card.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getCollaborator(),
+            requestDto.getDeadline());
         return new CardResponseDto(card);
     }
 
     @Transactional
     public void deleteCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+            .orElseThrow(() -> new CardNotFoundException("해당 카드는 삭제되었거나 존재하지 않습니다."));
+        cardRepository.delete(card);
 
-        Card card = cardRepository.findById(cardId).orElseThrow(() -> new CardNotFoundException("카드를 찾지 못했습니다"));
-//      user.removePost(card);
     }
 
-    public List<CardResponseDto> getCard(Long cardId) {
-        Card card = cardRepository.findById(cardId).orElseThrow(() -> new CardNotFoundException("카드를 찾지 못했습니다"));
+    @Transactional(readOnly = true)
+    public CardResponseDto getCard(Long cardId) {
 
         return cardRepository.findById(cardId)
+            .map(CardResponseDto::new)
+            .orElseThrow(() -> new DataNotFoundException("선택한 카드가 없습니다"));
+
+    }
+
+    public List<CardResponseDto> getAllCards() {
+        List<Card> cards = cardRepository.findAll();
+        return cards
             .stream()
             .map(CardResponseDto::new)
             .collect(Collectors.toList());
     }
 
-//    public List<CardResponseDto> getAllColumns(Long columnId, int page, int pageSize) {
-//        findColumn(columnId);
-//        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-//        Page<Card> cardPage = CardRepository.findAllByColumnId(columnId, pageable);
-//        return cardPage.stream().map(CardResponseDto::new).collect(Collectors.toList());
-//    }
+    public List<CardResponseDto> collaboratorCard(Long columnId, Long userId) {
+        List<Card> cards = cardRepository.findAllByUser_Id(userId);
+        return cards
+            .stream()
+            .map(CardResponseDto::new)
+            .collect(Collectors.toList());
+    }
 
-    public Card findColumn(Long cardId) {
+    public Card findCard(Long cardId) {
         return cardRepository.findById(cardId).orElseThrow(
-            () -> new DataNotFoundException("해당 칼럼은 삭제되었거나 존재하지 않습니다.")
+            () -> new DataNotFoundException("해당 카드는 삭제되었거나 존재하지 않습니다.")
         );
     }
+
 }

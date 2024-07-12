@@ -1,5 +1,6 @@
 package com.sparta.refrigerator.board.entity;
 
+import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.dto.BoardRequestDTO;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.Column;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Getter
