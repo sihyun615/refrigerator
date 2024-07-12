@@ -1,5 +1,6 @@
 package com.sparta.refrigerator.column.controller;
 
+import com.sparta.refrigerator.auth.service.UserDetailsImpl;
 import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnResponseDto;
