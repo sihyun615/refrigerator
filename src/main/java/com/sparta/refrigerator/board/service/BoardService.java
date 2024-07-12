@@ -31,7 +31,7 @@ public class BoardService {
 
     //Board 생성
     public BoardResponseDTO createBoard(BoardRequestDTO requestDTO, User user) {
-        if (Objects.equals(user.getAuth(), "MANAGER")) {
+        if (user.getAuth() == UserAuth.MANAGER) {
             Board board = new Board(requestDTO, user);
             boardRepository.save(board);
             return new BoardResponseDTO(board);
@@ -79,7 +79,7 @@ public class BoardService {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
         }
 
-        boolean isManagerOfBoard = invitationRepository.existsByBoardIdAndUserIdAndUserRole(boardId, user.getId(), UserAuth.MANAGER);
+        boolean isManagerOfBoard = invitationRepository.existsByBoardAndUserAndAuth(board, user, UserAuth.MANAGER);
 
         if (!isManagerOfBoard) {
             throw new ForbiddenException("권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.");
@@ -93,7 +93,7 @@ public class BoardService {
             throw new ViolatedException("이미 해당 보드에 초대된 사용자입니다.");
         }
 
-        Invitation invitation = new Invitation(board, invitee);
+        Invitation invitation = new Invitation(board, invitee, UserAuth.USER);
         invitationRepository.save(invitation);
     }
 

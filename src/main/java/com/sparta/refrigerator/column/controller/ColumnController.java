@@ -8,6 +8,8 @@ import com.sparta.refrigerator.column.service.ColumnService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,13 +18,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class ColumnController {
 
-    private ColumnService columnService;
+    private final ColumnService columnService;
 
     @PostMapping("/admin/boards/{boardId}/columns")
     public ResponseEntity<StatusCommonResponse> addColumn(@PathVariable(name = "boardId") Long boardId,
-        @RequestBody ColumnRequestDto requestDto,
+        @RequestBody @Valid ColumnRequestDto requestDto,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         columnService.addColumn(boardId, requestDto, userDetails.getUser());
         StatusCommonResponse response = new StatusCommonResponse(201, "컬럼 추가되었습니다.");
