@@ -1,5 +1,6 @@
 package com.sparta.refrigerator.comment.controller;
 
+import com.sparta.refrigerator.auth.service.UserDetailsImpl;
 import com.sparta.refrigerator.comment.dto.CommentRequestDto;
 import com.sparta.refrigerator.comment.dto.CommentResponseDto;
 import com.sparta.refrigerator.comment.service.CommentService;
