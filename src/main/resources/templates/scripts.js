@@ -25,6 +25,13 @@ function hideBoardCreationModal() {
   modal.style.display = 'none';
 }
 
+// 쿠키에서 특정 이름의 값을 가져오는 함수
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 // 보드 생성 함수
 function createBoard() {
   var title = document.getElementById('board-title').value;
@@ -35,24 +42,43 @@ function createBoard() {
     return;
   }
 
-  // 보드 생성 처리
+  // 보드 객체 생성
   var board = {
-    title: title,
-    content: content,
-    columns: [] // 보드의 컬럼들을 저장할 배열
+    boardName: title,
+    boradInfo: content
   };
-  boards.push(board);
 
-  // 사이드바에 보드 이름 추가
-  addBoardToSidebar(board);
+  // 쿠키에서 토큰 가져오기
+  var token = getCookie('Authorization'); // 쿠키 이름이 'token'이라고 가정
 
-  // 모달 닫기
-  hideBoardCreationModal();
-
-  // 입력 필드 초기화
-  document.getElementById('board-title').value = '';
-  document.getElementById('board-content').value = '';
-  document.getElementById('board-error').textContent = '';
+  // 서버로 보드 데이터 전송
+  fetch('http://localhost:8080/admin/boards', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token // Authorization 헤더에 토큰 추가
+    },
+    body: JSON.stringify(board)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // 보드를 로컬 리스트에 추가
+    boards.push(board);
+    // 사이드바에 보드 이름 추가
+    addBoardToSidebar(board);
+    // 모달 닫기
+    hideBoardCreationModal();
+    // 입력 필드 초기화
+    document.getElementById('board-title').value = '';
+    document.getElementById('board-content').value = '';
+    document.getElementById('board-error').textContent = '';
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    document.getElementById('board-error').textContent = '보드 생성 중 오류가 발생했습니다.';
+    console.log(error);
+  });
 }
 
 // 사이드바에 보드 이름 추가
