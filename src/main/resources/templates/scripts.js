@@ -1,7 +1,31 @@
-// 보드 목록 데이터
-var boards = [];
+var boards = []; // 배열 초기화
+
 
 $(document).ready(function () {
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+
+  $.ajax({
+    url: 'http://localhost:8080/boards',
+    type: 'GET',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('Authorization', auth);
+    },
+    success: function(data) {
+      console.log(data);
+      boards = data.data; // 서버에서 받은 데이터를 boards에 할당
+      console.log(boards); // boards 배열 확인
+      boards.forEach(function(board) {
+        addBoardToSidebar(board);
+      });
+    },
+    error: function(error) {
+      console.error('Error:', error);
+    }
+  });
 
   // id 가 query 인 녀석 위에서 엔터를 누르면 execSearch() 함수를 실행하라는 뜻입니다.
   $('#query').on('keypress', function (e) {
@@ -80,7 +104,8 @@ function createBoard() {
 
   var board = {
     boardName: title,
-    boardInfo: content
+    boardInfo: content,
+    columns: []
   };
 
   const auth = getToken();
@@ -98,7 +123,7 @@ function createBoard() {
       xhr.setRequestHeader('Authorization', auth);
     },
     success: function(data) {
-      var boardId = data.id; // 서버에서 반환된 id를 사용
+      var boardId = data.data.id;
       boards.push({ ...board, boardId });
       addBoardToSidebar({ ...board, boardId });
       hideBoardCreationModal();
@@ -114,6 +139,7 @@ function createBoard() {
 
 // 사이드바에 보드 이름 추가
 function addBoardToSidebar(board) {
+  console.log(board.boardId); // 보드 ID 출력
   var boardList = document.getElementById('board-list');
 
   var boardItem = document.createElement('div');
@@ -121,9 +147,9 @@ function addBoardToSidebar(board) {
   // 보드 제목과 수정 및 삭제 버튼 추가
   boardItem.innerHTML = `
         <span>${board.boardName}</span>
-        <button class="edit-board-button" onclick="openEditBoardModal('${board.title}')">보드 수정</button>
-        <button class="delete-board-button" onclick="confirmDeleteBoard('${board.title}')">보드 삭제</button>
-        <button class="invite-user-button" onclick="showInviteUserModal('${board.title}')">사용자 초대</button>
+        <button class="edit-board-button" onclick="openEditBoardModal('${board.boardId}')">보드 수정</button>
+        <button class="delete-board-button" onclick="confirmDeleteBoard('${board.boardId}')">보드 삭제</button>
+        <button class="invite-user-button" onclick="showInviteUserModal('${board.boardId}')">사용자 초대</button>
     `;
 
   boardItem.addEventListener('click', function() {
@@ -151,9 +177,9 @@ function displayBoard(board) {
 }
 
 // 보드 수정 모달 열기 함수
-function openEditBoardModal(boardTitle) {
+function openEditBoardModal(boardId) {
   var modal = document.getElementById('edit-board-modal');
-  var board = boards.find(b => b.boardName === boardTitle);
+  var board = boards.find(b => b.boardId === parseInt(boardId, 10));
 
   if (board) {
     document.getElementById('edit-board-name').value = board.boardName;
@@ -162,7 +188,7 @@ function openEditBoardModal(boardTitle) {
     // 저장 버튼에 클릭 이벤트 리스너 추가
     var saveButton = document.getElementById('save-board-button');
     saveButton.onclick = function() {
-      saveBoardChanges(board);
+      saveBoardChanges(boardId);
       closeModal(modal); // 저장 후 모달 닫기
     };
 
@@ -188,8 +214,12 @@ function closeModal(modal) {
   modal.style.display = 'none';
 }
 
-// 보드 수정 내용 저장 함수
-function saveBoardChanges(board) {
+
+// 보드 수정 함수
+function saveBoardChanges(boardId) {
+  console.log("dfsdfs"+boards);
+  var board = boards.find(b => b.boardId === parseInt(boardId, 10));
+
   var newTitle = document.getElementById('edit-board-name').value;
   var newContent = document.getElementById('edit-board-description').value;
 
@@ -202,43 +232,106 @@ function saveBoardChanges(board) {
   board.boardName = newTitle;
   board.boardInfo = newContent;
 
-  // 사이드바 및 칸반보드 업데이트
-  redrawSidebar();
-  displayBoard(board);
+  var updatedBoard = {
+    boardName: newTitle,
+    boardInfo: newContent
+  };
 
-  // 모달 닫기
-  closeModal(document.getElementById('edit-board-modal'));
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+
+  // 서버로 보드 수정 데이터 전송
+  $.ajax({
+    url: `http://localhost:8080/admin/boards/${boardId}`,
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify(updatedBoard),
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('Authorization', auth);
+    },
+    success: function(response) {
+      console.log(response);
+
+      console.log(boards);
+      // 로컬 리스트 업데이트
+      var boardIndex = boards.findIndex(b => b.boardId === parseInt(boardId, 10));
+      if (boardIndex !== -1) {
+        boards[boardIndex].boardName = newTitle;
+        boards[boardIndex].boardInfo = newContent;
+      }
+
+      // 사이드바 및 칸반보드 업데이트
+      redrawSidebar();
+      displayBoard(board);
+
+      // 모달 닫기
+      closeModal(document.getElementById('edit-board-modal'));
+
+      // 입력 필드 초기화
+      document.getElementById('edit-board-error').textContent = '';
+    },
+    error: function(error) {
+      console.error('Error:', error);
+      document.getElementById('edit-board-error').textContent = '보드 수정 중 오류가 발생했습니다.';
+    }
+  });
 }
 
 // 보드 삭제 버튼 클릭 시 모달 표시
-function confirmDeleteBoard(boardTitle) {
+function confirmDeleteBoard(boardId) {
   var modal = document.getElementById('board-delete-modal');
   modal.style.display = 'block';
 
   // 확인 버튼 클릭 시
   var confirmButton = document.getElementById('confirm-delete-button');
   confirmButton.onclick = function() {
-    deleteBoard(boardTitle);
+    deleteBoard(boardId);
   };
 }
 
 // 보드 삭제 함수
-function deleteBoard(boardTitle) {
-  // 보드 찾기
-  var boardIndex = boards.findIndex(b => b.boardName === boardTitle);
-  if (boardIndex !== -1) {
-    // 보드 삭제
-    boards.splice(boardIndex, 1);
-
-    // 사이드바 다시 그리기
-    redrawSidebar();
-
-    // 삭제 확인 모달 닫기
-    hideBoardDeleteModal();
-
-    // 보드 영역 초기화
-    clearKanbanBoard();
+function deleteBoard(boardId) {
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
   }
+
+  $.ajax({
+    url: `http://localhost:8080/admin/boards/${boardId}`,
+    type: 'DELETE',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('Authorization', auth);
+    },
+    success: function(data) {
+      console.log('Board deleted successfully:', data);
+
+      console.log(boardId);
+      console.log(typeof boardId);
+      // 보드 배열에서 삭제
+      var boardIndex = boards.findIndex(b => b.boardId === parseInt(boardId, 10));
+      console.log(boardIndex);
+      if (boardIndex !== -1) {
+        boards.splice(boardIndex, 1);
+
+        // 사이드바 다시 그리기
+        redrawSidebar();
+
+        // 보드 영역 초기화
+        clearKanbanBoard();
+      }
+
+      // 삭제 확인 모달 닫기
+      hideBoardDeleteModal();
+    },
+    error: function(err) {
+      console.error('Error deleting board:', err);
+      alert('보드 삭제 중 오류가 발생했습니다.');
+    }
+  });
 }
 
 // 보드 영역 초기화 함수
@@ -252,10 +345,25 @@ function redrawSidebar() {
   var boardList = document.getElementById('board-list');
   boardList.innerHTML = '';
 
-  // 모든 보드 다시 추가
+  // 보드 배열 확인
+  console.log("Boards array:", boards);
+
+// 보드 배열 순회하여 사이드바에 추가
   boards.forEach(function(board) {
+    console.log("Adding board to sidebar:", board);
     addBoardToSidebar(board);
   });
+}
+
+// 보드 생성 모달 닫기
+function hideEditBoardModal() {
+  var modal = document.getElementById('edit-board-modal');
+  modal.style.display = 'none';
+}
+// 컬럼 생성 모달 닫기
+function hideColumnEditModal() {
+  var modal = document.getElementById('column-creation-modal');
+  modal.style.display = 'none';
 }
 
 // 보드 삭제 확인 모달 닫기
@@ -265,10 +373,10 @@ function hideBoardDeleteModal() {
 }
 
 // 사용자 초대 모달 보이기
-function showInviteUserModal(boardTitle) {
+function showInviteUserModal(boardId) {
   var modal = document.getElementById('invite-user-modal');
   modal.style.display = 'block';
-  modal.dataset.boardTitle = boardTitle;
+  modal.dataset.id = boardId;
 }
 
 // 사용자 초대 모달 숨기기
