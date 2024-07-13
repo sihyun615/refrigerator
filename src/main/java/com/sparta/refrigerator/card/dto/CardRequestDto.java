@@ -16,7 +16,10 @@ public class CardRequestDto {
 
     @NotBlank(message = "추가할 제목을 입력해주세요")
     private String title;
+
+    @NotBlank(message = "추가할 내용을 입력해주세요.")
     private String content;
+
     private String collaborator;
     private LocalDate deadline;
 }

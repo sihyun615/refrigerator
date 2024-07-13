@@ -1,6 +1,6 @@
 package com.sparta.refrigerator.card.entity;
 
-import com.sparta.refrigerator.comment.entity.Comment;
+//import com.sparta.refrigerator.comment.entity.Comment;
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
@@ -60,8 +60,8 @@ public class Card extends TimeStamp {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> commentList = new ArrayList<>();
+//    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Comment> commentList = new ArrayList<>();
 
     public Card(CardRequestDto requestDto, Columns columns, User user, Board board) {
         this.title = requestDto.getTitle();

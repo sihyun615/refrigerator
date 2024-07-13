@@ -113,4 +113,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UserMisMatchException.class)
+    public ResponseEntity<String> userMisMatchException(UserMisMatchException ex) {
+        log.error("{}", ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
 }

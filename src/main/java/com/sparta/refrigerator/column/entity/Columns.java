@@ -31,7 +31,7 @@ public class Columns extends TimeStamp {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     @OneToMany(mappedBy = "columns",cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Card> cardList=new ArrayList<>();
+    private List<Card> cardList = new ArrayList<>();
 
     public Columns(Board board, ColumnRequestDto requestDto, User user, Long maxIndex) {
         this.board = board;

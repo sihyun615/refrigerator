@@ -1,9 +1,12 @@
 package com.sparta.refrigerator.card.controller;
 
 import com.sparta.refrigerator.auth.service.UserDetailsImpl;
+import com.sparta.refrigerator.card.dto.CardCollaboratorRequestDto;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.card.dto.CardResponseDto;
+import com.sparta.refrigerator.card.dto.CardStatusRequestDto;
 import com.sparta.refrigerator.card.service.CardService;
+import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.service.ColumnService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
@@ -20,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,7 +37,7 @@ public class CardController {
     private final ColumnService columnService;
 
 
-    @PostMapping("/admin/boards/{boardId}/columns/{columnId}/cards")
+    @PostMapping("/boards/{boardId}/columns/{columnId}/cards")
     public ResponseEntity<DataCommonResponse<CardResponseDto>> createCard(
         @PathVariable Long boardId, @PathVariable Long columnId,
         @RequestBody CardRequestDto requestDto,
@@ -51,7 +53,7 @@ public class CardController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("/admin/boards/{boardId}/columns/{columnId}/cards/{cardId}")
+    @PutMapping("/boards/{boardId}/columns/{columnId}/cards/{cardId}")
     public ResponseEntity<DataCommonResponse<CardResponseDto>> updateCard(
         @PathVariable Long boardId, @PathVariable Long columnId, @PathVariable Long cardId,
         @RequestBody CardRequestDto requestDto,
@@ -63,7 +65,7 @@ public class CardController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/admin/boards/{boardId}/columns/{columnId}/cards/{cardId}")
+    @DeleteMapping("/boards/{boardId}/columns/{columnId}/cards/{cardId}")
     public ResponseEntity<StatusCommonResponse> deleteCard(@PathVariable Long boardId,
         @PathVariable Long columnId, @PathVariable Long cardId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -72,47 +74,63 @@ public class CardController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/columns/{columnId}/cards/{cardId}")
+    @GetMapping("/board/{boardId}/columns/{columnId}/cards/{cardId}")
     public ResponseEntity<DataCommonResponse<CardResponseDto>> getCard(
-        @PathVariable Long columnId, @PathVariable Long cardId,
+        @PathVariable Long columnId, @PathVariable Long cardId, @PathVariable Long boardId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        CardResponseDto responseDto = cardService.getCard(cardId, userDetails.getUser(), columnId);
+        CardResponseDto responseDto = cardService.getCard(cardId, userDetails.getUser(), columnId, boardId);
         DataCommonResponse<CardResponseDto> response = new DataCommonResponse<>(200,
             "카드 단건 조회에 성공하였습니다.", responseDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/boards/{boardId}/cards")
+    @GetMapping("/admin/cards")
     public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getCards(
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<CardResponseDto> responseDtoList = cardService.getCards();
+        List<CardResponseDto> responseDtoList = cardService.getCards(userDetails.getUser());
         DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
-            "카드 전체조회에 성공하였습니다.", responseDtoList);
+            "보드 상관없이 모든 카드 전체조회에 성공하였습니다.", responseDtoList);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /**
-     * 작업자별 카드 조회 기능
-     *
-     * @param userId : 조회할 작업자의 Id
-     * @return : 입력된 작업자의 카드
-     */
-    @GetMapping("/boards/{boardId}/cards/assignee")
-    public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getCollaboratorCard(
-        @RequestParam Long userId, @PathVariable Long boardId,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<CardResponseDto> responseDtoList = cardService.getCollaboratorCard(userId, boardId);
+    @GetMapping("/boards/{boardId}/cards")
+    public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getBoardCards(
+        @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long boardId) {
+        List<CardResponseDto> responseDtoList = cardService.getBoardCards(userDetails.getUser(),
+            boardId);
+        DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
+            "보드내에서 카드 전체조회에 성공하였습니다.", responseDtoList);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/boards/{boardId}/cards/Assignee")
+    public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getAssigneeCard(
+        @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CardCollaboratorRequestDto requestDto,
+        @PathVariable Long boardId) {
+        List<CardResponseDto> responseDtoList = cardService.getAssigneeCard(
+            requestDto.getCollaborator(), boardId, userDetails.getUser());
         DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
             "카드 작업자별 조회에 성공하였습니다.", responseDtoList);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/boards/{boardId}/columns/{columnId}")
+    @GetMapping("/boards/{boardId}/cards/status")
     public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getColumnNameCard(
-        @PathVariable Long columnId, @PathVariable Long boardId) {
-        List<CardResponseDto> responseDtoList = cardService.getColumnNameCard(columnId, boardId);
+        @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long boardId,
+        @RequestBody CardStatusRequestDto requestDto) {
+        List<CardResponseDto> responseDtoList = cardService.getColumnNameCard(boardId,
+            requestDto.getColumnName(), userDetails.getUser());
         DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
             "카드 상태별 조회에 성공하였습니다.", responseDtoList);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/boards/{boardId}/columns/{columnId}/cards/{cardId}/transfer")
+    public ResponseEntity<StatusCommonResponse> moveColumn(@PathVariable Long boardId,
+        @PathVariable Long columnId, @RequestBody ColumnMoveRequestDto requestDto,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        columnService.moveColumn(boardId, columnId, requestDto, userDetails.getUser());
+        StatusCommonResponse response = new StatusCommonResponse(200, "컬럼 이동되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

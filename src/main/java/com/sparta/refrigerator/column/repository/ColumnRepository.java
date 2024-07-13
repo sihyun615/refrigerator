@@ -13,10 +13,12 @@ import java.util.Optional;
 @Repository
 public interface ColumnRepository extends JpaRepository<Columns, Long> {
 
-    Optional<Object> findByColumnName(String columnName);
+    Optional<Columns> findByColumnName(String columnName);
 
     List<Columns> findAllByBoardOrderByColumnIndex(Board board);
 
     @Query("SELECT MAX(c.columnIndex) FROM Columns c WHERE c.board = :board")
     Long findMaxColumnIndexByBoard(@Param("board") Board board);
+
+
 }
