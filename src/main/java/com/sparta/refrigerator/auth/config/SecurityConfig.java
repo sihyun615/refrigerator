@@ -65,6 +65,7 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests((authorizeRequest) ->
             authorizeRequest
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .requestMatchers("/view").permitAll()
                 .requestMatchers("/users/**").permitAll()
                 .requestMatchers("/admin/**").hasAuthority("MANAGER")
                 .requestMatchers(HttpMethod.GET).permitAll()

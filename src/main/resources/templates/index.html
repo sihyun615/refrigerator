@@ -1,123 +1,173 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"
-          integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.css"/>
-
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="/js/basic.js"></script>
-  <title>냉장고를 부탁해</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>칸반 보드</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"
+          integrity="sha512-m93xggmOYckdyFONd+UL1EyM3n4sEY2/o7SMXRx7CeOXgfyfYQ2nA9M1uHheDr5O3zOL1bqswH+/PiIoWB6zAA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
+
 <body>
-<div class="header" style="position:relative;">
-  <!--headr-->
-  <div id="header-title-login-user">
-    <span id="username"></span> 님의
+<div class="container">
+  <!-- 헤더 -->
+  <div class="header">
+    <button id="board-create-button" class="header-button" onclick="showBoardCreationModal()">보드 생성</button>
+    <button id="logout-button" class="header-button" onclick="logout()">로그아웃</button>
   </div>
-  <div id="header-title-select-shop">
-    냉장고
-  </div>
-  <a id="login-text" href="javascript:logout()">
-    로그아웃
-  </a>
-  <!--/headr-->
-</div>
-<div class="nav">
-  <div class="nav-see active">
-    모아보기
-  </div>
-  <div class="nav-search">
-    탐색하기
-  </div>
-</div>
-<div id="see-area">
-  <div class="folder-bar folder-black">
-    <div>
-      <button id="folder-all" class="folder-bar-item folder-button product-folder folder-active" onclick="openFolder()">전체</button>
-    </div>
-    <div id="fragment">
-      <div th:each="folder : ${folders}">
-        <button class="folder-bar-item folder-button product-folder"
-                th:value="${folder.id}"
-                th:utext="${folder.name}"
-                th:attr="onclick=|openFolder(${folder.id})|">
-        </button>
-      </div>
-    </div>
-    <div>
-      <button id="folder-add" class="folder-bar-item folder-button product-folder" onclick="openAddFolderPopup()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="30px" fill="currentColor" class="bi bi-folder-plus" viewBox="0 0 16 16">
-          <path d="M.5 3l.04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14H9v-1H2.826a1 1 0 0 1-.995-.91l-.637-7A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09L14.54 8h1.005l.256-2.819A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm5.672-1a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.684.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z"/>
-          <path d="M13.5 10a.5.5 0 0 1 .5.5V12h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V13h-1.5a.5.5 0 0 1 0-1H13v-1.5a.5.5 0 0 1 .5-.5z"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-  <div class="pagination">
-    정렬:
-    <select id="sorting" onchange="showProduct()">
-      <option value="id">ID</option>
-      <option value="title">상품명</option>
-      <option value="lprice">최저가</option>
-    </select>
-    <input type="radio" name="isAsc" value="true" onchange="showProduct()" checked/> 오름차순
-    <input type="radio" name="isAsc" value="false" onchange="showProduct()"/> 내림차순
-  </div>
-  <div id="pagination" class="pagination"></div>
-  <br>
-  <div id="product-container">
-  </div>
-  <div id="container2" class="popup-container">
-    <div class="popup" style="width:410px; height:auto">
-      <button id="close2" class="close">
-        X
-      </button>
-      <h1>📆 보드 추가하기</h1>
-      <p>보드를 추가해서 기간별로 식재료를 관리해보세요!</p>
-      <div id="folders-input">
-        <input type="text" class="folderToAdd" placeholder="추가할 폴더명">
-        <!--                <div class="control" data-v-79d84978="" style="width:20px"><a class="button is-primary is-outlined" data-v-79d84978=""><span class="icon" data-v-79d84978=""><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512" class="svg-inline&#45;&#45;fa fa-times fa-w-11" data-v-79d84978=""><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" data-v-79d84978="" class=""></path></svg></span></a></div>-->
-      </div>
-      <div onclick="addFolderInput()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="30px" fill="currentColor" class="bi bi-folder-plus" viewBox="0 0 16 16">
-          <path d="M.5 3l.04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14H9v-1H2.826a1 1 0 0 1-.995-.91l-.637-7A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09L14.54 8h1.005l.256-2.819A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm5.672-1a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.684.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z"/>
-          <path d="M13.5 10a.5.5 0 0 1 .5.5V12h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V13h-1.5a.5.5 0 0 1 0-1H13v-1.5a.5.5 0 0 1 .5-.5z"/>
-        </svg>
-      </div>
-      <button id="add-folder-btn" class="cta2" onclick="addFolder()">추가하기</button>
-    </div>
-  </div>
-</div>
-<div id="search-area">
-  <div>
-    <input type="text" id="query">
-  </div>
-  <div id="search-result-box">
 
+  <!-- 사이드바 -->
+  <div class="sidebar" id="board-list">
+    <!-- 생성된 보드 목록이 이곳에 추가됩니다 -->
   </div>
-  <div id="container" class="popup-container">
-    <div class="popup">
-      <button id="close" class="close">
-        X
-      </button>
-      <h1>⏰최저가 설정하기</h1>
-      <p>최저가를 설정해두면 선택하신 상품의 최저가가 떴을 때<br/> 표시해드려요!</p>
+
+  <!-- 칸반 보드 -->
+  <div id="kanban-board">
+    <!-- 생성된 보드들이 이곳에 추가됩니다 -->
+  </div>
+
+  <!-- 보드 생성 모달 -->
+  <div id="board-creation-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideBoardCreationModal()">&times;</span>
+      <h2>보드 생성</h2>
+      <input type="text" id="board-title" placeholder="보드 이름">
+      <textarea id="board-content" placeholder="보드 내용"></textarea>
+      <button onclick="createBoard()">보드 생성</button>
+      <p id="board-error" class="error-message"></p>
+    </div>
+  </div>
+
+  <!-- 보드 수정 모달 -->
+  <div id="edit-board-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="hideEditBoardModal()">&times;</span>
+      <h2>보드 수정</h2>
+      <input type="text" id="edit-board-name" placeholder="보드 이름">
+      <textarea id="edit-board-description" placeholder="보드 내용"></textarea>
+      <button id="save-board-button">저장</button>
+      <button id="cancel-edit-button">닫기 및 취소</button>
+    </div>
+  </div>
+
+  <!-- 보드 삭제 확인 모달 -->
+  <div id="board-delete-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideBoardDeleteModal()">&times;</span>
+      <h2>보드 삭제</h2>
+      <p>정말로 이 보드를 삭제하시겠습니까?</p>
       <div>
-        <input type="text" id="myprice" placeholder="200,000">원
+        <button id="confirm-delete-button">확인</button>
+        <button onclick="hideBoardDeleteModal()">취소</button>
       </div>
-      <button class="cta" onclick="setMyprice()">설정하기</button>
     </div>
   </div>
+
+  <!-- 컬럼 생성 모달 -->
+  <div id="column-creation-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideColumnCreationModal()">&times;</span>
+      <h2>컬럼 추가</h2>
+      <input type="text" id="column-name" placeholder="컬럼 이름">
+      <button onclick="createColumn()">컬럼 추가</button>
+    </div>
+  </div>
+
+  <!-- 컬럼 수정 모달 -->
+  <div id="edit-column-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="hideColumnEditModal()">&times;</span>
+      <h2>컬럼 수정</h2>
+      <input type="text" id="edit-column-name" placeholder="컬럼 이름">
+      <button id="save-column-button">저장</button>
+      <button id="cancel-edit-column-button">취소</button>
+    </div>
+  </div>
+
+  <!-- 컬럼 삭제 확인 모달 -->
+  <div id="column-delete-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideColumnDeleteModal()">&times;</span>
+      <h2>컬럼 삭제</h2>
+      <p>정말로 이 컬럼을 삭제하시겠습니까?</p>
+      <div>
+        <button id="confirm-delete-column-button">확인</button>
+        <button onclick="hideColumnDeleteModal()">닫기 및 취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드 생성 모달 -->
+  <div id="card-creation-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideCardCreationModal()">&times;</span>
+      <h2>카드 추가</h2>
+      <input type="text" id="card-title" placeholder="카드 제목">
+      <textarea id="card-content" placeholder="카드 내용"></textarea>
+      <input type="text" id="card-assignee" placeholder="작업자">
+      <input type="date" id="card-due-date" placeholder="마감일">
+      <button onclick="createCard()">카드 추가</button>
+    </div>
+  </div>
+
+  <!-- 카드 수정 모달 -->
+  <div id="edit-card-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="hideCardEditModal()">&times;</span>
+      <h2>Edit Card</h2>
+      <form>
+        <label for="edit-card-title">Title:</label>
+        <input type="text" id="edit-card-title" name="edit-card-title">
+        <label for="edit-card-content">Content:</label>
+        <textarea id="edit-card-content" name="edit-card-content"></textarea>
+        <label for="edit-card-assignee">Assignee:</label>
+        <input type="text" id="edit-card-assignee" name="edit-card-assignee">
+        <label for="edit-card-due-date">Due Date:</label>
+        <input type="date" id="edit-card-due-date" name="edit-card-due-date">
+        <button type="button" id="save-edit-card-button">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 카드 삭제 확인 모달 -->
+  <div id="card-delete-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideCardDeleteModal()">&times;</span>
+      <h2>카드 삭제</h2>
+      <p>정말로 이 카드를 삭제하시겠습니까?</p>
+      <div>
+        <button id="confirm-delete-card-button">확인</button>
+        <button onclick="hideCardDeleteModal()">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드 상세 정보 모달 -->
+  <div id="card-details-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span id="card-details-close-button" class="close">&times;</span>
+      <h2 id="card-details-title"></h2>
+      <p id="card-details-content"></p>
+      <p><strong>담당자:</strong> <span id="card-details-assignee"></span></p>
+      <p><strong>마감일:</strong> <span id="card-details-due-date"></span></p>
+
+      <!-- 댓글 입력 폼 -->
+      <form id="comment-form">
+        <input type="text" id="comment-input" placeholder="댓글 입력">
+        <button type="button" onclick="addComment()">등록</button>
+      </form>
+
+      <!-- 댓글 목록 -->
+      <div id="card-comments-list"></div>
+    </div>
+  </div>
+
 </div>
 
-<input type="hidden" id="admin"/>
+<script src="scripts.js"></script>
 </body>
+
 </html>
