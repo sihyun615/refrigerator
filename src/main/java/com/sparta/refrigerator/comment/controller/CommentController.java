@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cards/{cardId}/comment")
+@RequestMapping("/boards/{boardId}/columns/{columnId}/cards/{cardId}/comments")
 public class CommentController {
 
     private static final int PAGE_SIZE = 5;
