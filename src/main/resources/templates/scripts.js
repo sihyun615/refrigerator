@@ -66,6 +66,7 @@ function addBoardToSidebar(board) {
         <span>${board.title}</span>
         <button class="edit-board-button" onclick="openEditBoardModal('${board.title}')">보드 수정</button>
         <button class="delete-board-button" onclick="confirmDeleteBoard('${board.title}')">보드 삭제</button>
+        <button class="invite-user-button" onclick="showInviteUserModal('${board.title}')">사용자 초대</button>
     `;
 
   boardItem.addEventListener('click', function() {
@@ -90,22 +91,10 @@ function displayBoard(board) {
     `;
   // 저장된 컬럼들 표시
   displayColumns(board);
-
-  // 컬럼 드래그 앤 드롭 활성화
-  new Sortable(document.getElementById(`columns-${board.title}`), {
-    group: 'shared',
-    animation: 150,
-    ghostClass: 'sortable-ghost',
-    onEnd: function (evt) {
-      var movedColumn = board.columns.splice(evt.oldIndex, 1)[0];
-      board.columns.splice(evt.newIndex, 0, movedColumn);
-      console.log('Column moved from index', evt.oldIndex, 'to', evt.newIndex);
-    },
-  });
 }
 
 // 보드 수정 모달 열기 함수
-function showEditBoardModal(boardTitle) {
+function openEditBoardModal(boardTitle) {
   var modal = document.getElementById('edit-board-modal');
   var board = boards.find(b => b.title === boardTitle);
 
@@ -117,7 +106,7 @@ function showEditBoardModal(boardTitle) {
     var saveButton = document.getElementById('save-board-button');
     saveButton.onclick = function() {
       saveBoardChanges(board);
-      hideEditBoardModal(); // 저장 후 모달 닫기
+      closeModal(modal); // 저장 후 모달 닫기
     };
 
     // 취소 버튼에 클릭 이벤트 리스너 추가
@@ -128,23 +117,19 @@ function showEditBoardModal(boardTitle) {
 
     // 모달 닫기 버튼에 클릭 이벤트 리스너 추가
     var closeButton = modal.querySelector('.close');
-    closeButton.addEventListener('click', function() {
-      closeModal(modal);
-    });
+    closeButton.onclick = function() {
+      closeModal(modal); // 닫기 버튼 클릭 시 모달 닫기
+    };
 
     // 모달 보이기
     modal.style.display = 'block';
-
-    // 이벤트 리스너가 한 번만 추가되어야 하므로, 다시 추가하지 않습니다.
   }
 }
-
 
 // 모달 닫기 함수
 function closeModal(modal) {
   modal.style.display = 'none';
 }
-
 
 // 보드 수정 내용 저장 함수
 function saveBoardChanges(board) {
@@ -166,11 +151,6 @@ function saveBoardChanges(board) {
 
   // 모달 닫기
   closeModal(document.getElementById('edit-board-modal'));
-}
-
-// 모달 닫기 함수
-function closeModal(modal) {
-  modal.style.display = 'none';
 }
 
 // 보드 삭제 버튼 클릭 시 모달 표시
@@ -225,6 +205,38 @@ function redrawSidebar() {
 function hideBoardDeleteModal() {
   var modal = document.getElementById('board-delete-modal');
   modal.style.display = 'none';
+}
+
+// 사용자 초대 모달 보이기
+function showInviteUserModal(boardTitle) {
+  var modal = document.getElementById('invite-user-modal');
+  modal.style.display = 'block';
+  modal.dataset.boardTitle = boardTitle;
+}
+
+// 사용자 초대 모달 숨기기
+function hideInviteUserModal() {
+  var modal = document.getElementById('invite-user-modal');
+  modal.style.display = 'none';
+}
+
+// 사용자 초대 함수
+function inviteUser() {
+  var boardTitle = document.getElementById('invite-user-modal').dataset.boardTitle;
+  var userId = document.getElementById('invite-user-id').value;
+
+  if (userId.trim() === '') {
+    alert('사용자 ID를 입력해주세요.');
+    return;
+  }
+
+  // 보드 찾기
+  var board = boards.find(b => b.title === boardTitle);
+  if (board) {
+    // 초대 로직 추가 (예: 서버에 요청 보내기)
+    alert(`${userId}님을 초대했습니다.`);
+    hideInviteUserModal();
+  }
 }
 
 // 컬럼 추가 모달 보이기
@@ -358,36 +370,59 @@ function createCard() {
   }
 }
 
-function showCardEditModal(boardTitle, columnIndex, cardIndex, cardTitle, cardContent) {
-  // 카드 수정 모달 표시 코드
+// 카드 수정 모달 열기 함수
+function showCardEditModal(boardTitle, columnIndex, cardIndex, cardTitle, cardContent, cardAssignee, cardDueDate) {
+  // 기존에 열려 있는 모든 모달 닫기
+  document.querySelectorAll('.modal').forEach(function(modal) {
+    modal.style.display = 'none';
+  });
+
+  var modal = document.getElementById('edit-card-modal');
   var editCardTitleInput = document.getElementById('edit-card-title');
   var editCardContentTextarea = document.getElementById('edit-card-content');
+  var editCardAssigneeInput = document.getElementById('edit-card-assignee');
+  var editCardDueDateInput = document.getElementById('edit-card-due-date');
 
   editCardTitleInput.value = cardTitle;
   editCardContentTextarea.value = cardContent;
+  editCardAssigneeInput.value = cardAssignee;
+  editCardDueDateInput.value = cardDueDate;
 
   var saveEditCardButton = document.getElementById('save-edit-card-button');
   saveEditCardButton.onclick = function() {
-    // 수정된 카드 제목과 내용으로 업데이트
-    var newCardTitle = editCardTitleInput.value;
-    var newCardContent = editCardContentTextarea.value;
-    editCard(boardTitle, columnIndex, cardIndex, newCardTitle, newCardContent);
+    saveCardEdit(boardTitle, columnIndex, cardIndex);
     hideCardEditModal();
   };
+
+  modal.style.display = 'block';
 }
 
-function editCard(boardTitle, columnIndex, cardIndex, newTitle, newContent) {
-  var board = boards.find(b => b.title === boardTitle);
-  if (board && columnIndex !== undefined && cardIndex !== undefined && columnIndex < board.columns.length && cardIndex < board.columns[columnIndex].cards.length) {
-    var card = board.columns[columnIndex].cards[cardIndex];
-    card.title = newTitle;
-    card.content = newContent;
+// 카드 수정 저장 함수
+function saveCardEdit(boardTitle, columnIndex, cardIndex) {
+  var editedTitle = document.getElementById('edit-card-title').value;
+  var editedContent = document.getElementById('edit-card-content').value;
+  var editedAssignee = document.getElementById('edit-card-assignee').value;
+  var editedDueDate = document.getElementById('edit-card-due-date').value;
 
-    // 다시 보드 표시
+  // 실제로 데이터를 업데이트하고 화면을 다시 그리는 작업이 필요합니다.
+  var board = boards.find(b => b.title === boardTitle);
+  if (board) {
+    var cardToUpdate = board.columns[columnIndex].cards[cardIndex];
+    cardToUpdate.title = editedTitle;
+    cardToUpdate.content = editedContent;
+    cardToUpdate.assignee = editedAssignee;
+    cardToUpdate.dueDate = editedDueDate;
+
+    // 화면 다시 그리기
     displayColumns(board);
   }
 }
 
+// 모달 닫기
+function hideCardEditModal() {
+  var modal = document.getElementById('edit-card-modal');
+  modal.style.display = 'none';
+}
 
 // 저장된 컬럼들 표시
 function displayColumns(board) {
@@ -437,6 +472,9 @@ function displayColumns(board) {
       // 카드 제목 출력
       var cardTitleSpan = document.createElement('span');
       cardTitleSpan.textContent = card.title;
+      cardTitleSpan.onclick = function() {
+        showCardDetailsModal(card); // 카드 제목 클릭 시 상세 정보 모달 표시
+      };
       cardElement.appendChild(cardTitleSpan);
 
       // 수정 버튼 추가 (카드 수정)
@@ -444,7 +482,7 @@ function displayColumns(board) {
       editCardButton.textContent = '카드수정';
       editCardButton.classList.add('edit-card-button');
       editCardButton.onclick = function() {
-        showCardEditModal(board.title, columnIndex, cardIndex, card.title, card.description, card.assignee, card.dueDate);
+        showCardEditModal(board.title, columnIndex, cardIndex, card.title, card.content, card.assignee, card.dueDate);
       };
       cardElement.appendChild(editCardButton);
 
@@ -457,10 +495,6 @@ function displayColumns(board) {
       };
       cardElement.appendChild(deleteCardButton);
 
-      // 카드 상세 정보 모달 열기
-      cardElement.onclick = function() {
-        showCardDetailsModal(card);
-      };
       columnElement.appendChild(cardElement);
     });
 
@@ -602,65 +636,6 @@ function hideCardDeleteModal() {
 // 초기화 함수 호출
 initialize();
 
-/// 보드 수정 모달 열기 함수
-function openEditBoardModal(boardTitle) {
-  var modal = document.getElementById('edit-board-modal');
-  var board = boards.find(b => b.title === boardTitle);
-
-  if (board) {
-    document.getElementById('edit-board-name').value = board.title;
-    document.getElementById('edit-board-description').value = board.content;
-
-    // 저장 버튼에 클릭 이벤트 리스너 추가
-    var saveButton = document.getElementById('save-board-button');
-    saveButton.onclick = function() {
-      saveBoardChanges(board);
-    };
-
-    // 취소 버튼에 클릭 이벤트 리스너 추가
-    var cancelButton = document.getElementById('cancel-edit-button');
-    cancelButton.onclick = function() {
-      closeModal(modal); // 취소 시 모달 닫기
-    };
-
-    // 모달 닫기 버튼에 클릭 이벤트 리스너 추가
-    var closeButton = modal.querySelector('.close');
-    closeButton.addEventListener('click', function() {
-      closeModal(modal);
-    });
-
-    // 모달 보이기
-    modal.style.display = 'block';
-  }
-}
-
-// 모달 닫기 함수
-function closeModal(modal) {
-  modal.style.display = 'none';
-}
-
-// saveBoardChanges 함수 정의
-function saveBoardChanges(board) {
-  var newTitle = document.getElementById('edit-board-name').value;
-  var newContent = document.getElementById('edit-board-description').value;
-
-  if (newTitle.trim() === '') {
-    alert('보드 이름을 입력하세요.');
-    return;
-  }
-
-  // 보드 정보 업데이트
-  board.title = newTitle;
-  board.content = newContent;
-
-  // 사이드바 및 칸반보드 업데이트
-  redrawSidebar();
-  displayBoard(board);
-
-  // 모달 닫기
-  closeModal(document.getElementById('edit-board-modal'));
-}
-
 // 컬럼 수정 모달 열기 함수
 function showColumnEditModal(boardTitle, columnIndex, currentColumnName) {
   var modal = document.getElementById('edit-column-modal');
@@ -685,12 +660,12 @@ function showColumnEditModal(boardTitle, columnIndex, currentColumnName) {
     updateColumnName(boardTitle, columnIndex, newColumnName);
 
     // 모달 닫기
-    hideColumnEditModal();
+    closeModal(modal);
   };
 
   // 취소 버튼 클릭 시 모달 닫기
   cancelEditColumnButton.onclick = function() {
-    hideColumnEditModal();
+    closeModal(modal);
   };
 
   // 모달 표시
@@ -706,18 +681,13 @@ function updateColumnName(boardTitle, columnIndex, newColumnName) {
   }
 }
 
-// 모달 창 닫기 함수
-function closeModal(modalId) {
-  var modal = document.getElementById(modalId);
-  modal.style.display = 'none';
-}
-
 // 카드 수정 모달 열기 함수
-function showCardEditModal(boardTitle, columnIndex, cardIndex, currentTitle, currentDescription, currentAssignee, currentDueDate) {
-  // 기존에 열려있는 모달 창 닫기
-  closeModal('show-card-modal'); // 예시: 다른 모달의 ID를 여기에 입력
+function showCardEditModal(boardTitle, columnIndex, cardIndex, currentTitle, currentContent, currentAssignee, currentDueDate) {
+  // 기존에 열려 있는 모든 모달 닫기
+  document.querySelectorAll('.modal').forEach(function(modal) {
+    modal.style.display = 'none';
+  });
 
-  // 나머지 코드는 이전 답변에서 사용한 것과 동일
   var modal = document.getElementById('edit-card-modal');
   var editCardTitleInput = document.getElementById('edit-card-title');
   var editCardContentTextarea = document.getElementById('edit-card-content');
@@ -725,7 +695,7 @@ function showCardEditModal(boardTitle, columnIndex, cardIndex, currentTitle, cur
   var editCardDueDateInput = document.getElementById('edit-card-due-date');
 
   editCardTitleInput.value = currentTitle;
-  editCardContentTextarea.value = currentDescription;
+  editCardContentTextarea.value = currentContent;
   editCardAssigneeInput.value = currentAssignee;
   editCardDueDateInput.value = currentDueDate;
 
@@ -738,27 +708,19 @@ function showCardEditModal(boardTitle, columnIndex, cardIndex, currentTitle, cur
   modal.style.display = 'block';
 }
 
-// 카드 수정 버튼 클릭 이벤트 리스너 추가
-var editCardButton = document.getElementById('edit-card-button'); // 예시: 카드 수정 버튼의 ID를 여기에 입력
-editCardButton.onclick = function() {
-  // 카드 수정 모달 열기 함수 호출
-  showCardEditModal(boardTitle, columnIndex, cardIndex, currentTitle, currentDescription, currentAssignee, currentDueDate);
-};
-
-
-// 카드 수정 저장
+// 카드 수정 저장 함수
 function saveCardEdit(boardTitle, columnIndex, cardIndex) {
   var editedTitle = document.getElementById('edit-card-title').value;
-  var editedDescription = document.getElementById('edit-card-content').value;
+  var editedContent = document.getElementById('edit-card-content').value;
   var editedAssignee = document.getElementById('edit-card-assignee').value;
   var editedDueDate = document.getElementById('edit-card-due-date').value;
 
   // 실제로 데이터를 업데이트하고 화면을 다시 그리는 작업이 필요합니다.
-  var board = findBoard(boardTitle);
+  var board = boards.find(b => b.title === boardTitle);
   if (board) {
     var cardToUpdate = board.columns[columnIndex].cards[cardIndex];
     cardToUpdate.title = editedTitle;
-    cardToUpdate.content = editedDescription;
+    cardToUpdate.content = editedContent;
     cardToUpdate.assignee = editedAssignee;
     cardToUpdate.dueDate = editedDueDate;
 
@@ -772,3 +734,84 @@ function hideCardEditModal() {
   var modal = document.getElementById('edit-card-modal');
   modal.style.display = 'none';
 }
+
+// 저장된 컬럼들 표시
+function displayColumns(board) {
+  var columnsContainer = document.getElementById(`columns-${board.title}`);
+  columnsContainer.innerHTML = ''; // 초기화
+
+  board.columns.forEach(function(column, columnIndex) {
+    var columnElement = document.createElement('div');
+    columnElement.classList.add('column');
+
+    // 컬럼 제목 출력
+    var columnNameSpan = document.createElement('span');
+    columnNameSpan.textContent = column.name;
+    columnElement.appendChild(columnNameSpan);
+
+    // 수정 버튼 추가 (컬럼 수정)
+    var editColumnButton = document.createElement('button');
+    editColumnButton.textContent = '컬럼수정';
+    editColumnButton.classList.add('edit-column-button');
+    editColumnButton.onclick = function() {
+      showColumnEditModal(board.title, columnIndex, column.name);
+    };
+    columnElement.appendChild(editColumnButton);
+
+    // 삭제 버튼 추가 (컬럼 삭제)
+    var deleteColumnButton = document.createElement('button');
+    deleteColumnButton.textContent = '컬럼삭제';
+    deleteColumnButton.classList.add('delete-column-button');
+    deleteColumnButton.onclick = function(event) {
+      confirmDeleteColumn(board.title, columnIndex, event);
+    };
+    columnElement.appendChild(deleteColumnButton);
+
+    // 카드 추가 버튼
+    var addCardButton = document.createElement('button');
+    addCardButton.textContent = '카드 추가';
+    addCardButton.onclick = function() {
+      showCardCreationModal(columnIndex, board.title);
+    };
+    columnElement.appendChild(addCardButton);
+
+    // 카드 표시
+    column.cards.forEach(function(card, cardIndex) {
+      var cardElement = document.createElement('div');
+      cardElement.classList.add('card');
+
+      // 카드 제목 출력
+      var cardTitleSpan = document.createElement('span');
+      cardTitleSpan.textContent = card.title;
+      cardTitleSpan.onclick = function() {
+        showCardDetailsModal(card); // 카드 제목 클릭 시 상세 정보 모달 표시
+      };
+      cardElement.appendChild(cardTitleSpan);
+
+      // 수정 버튼 추가 (카드 수정)
+      var editCardButton = document.createElement('button');
+      editCardButton.textContent = '카드수정';
+      editCardButton.classList.add('edit-card-button');
+      editCardButton.onclick = function() {
+        showCardEditModal(board.title, columnIndex, cardIndex, card.title, card.content, card.assignee, card.dueDate);
+      };
+      cardElement.appendChild(editCardButton);
+
+      // 삭제 버튼 추가 (카드 삭제)
+      var deleteCardButton = document.createElement('button');
+      deleteCardButton.textContent = '카드삭제';
+      deleteCardButton.classList.add('delete-card-button');
+      deleteCardButton.onclick = function(event) {
+        confirmDeleteCard(board.title, columnIndex, cardIndex, event);
+      };
+      cardElement.appendChild(deleteCardButton);
+
+      columnElement.appendChild(cardElement);
+    });
+
+    columnsContainer.appendChild(columnElement);
+  });
+}
+
+// 초기화 함수 호출
+initialize();

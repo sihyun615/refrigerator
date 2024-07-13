@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,6 @@
           integrity="sha512-m93xggmOYckdyFONd+UL1EyM3n4sEY2/o7SMXRx7CeOXgfyfYQ2nA9M1uHheDr5O3zOL1bqswH+/PiIoWB6zAA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
-
 <body>
 <div class="container">
   <!-- 헤더 -->
@@ -63,6 +61,16 @@
         <button id="confirm-delete-button">확인</button>
         <button onclick="hideBoardDeleteModal()">취소</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 사용자 초대 모달 -->
+  <div id="invite-user-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="hideInviteUserModal()">&times;</span>
+      <h2>사용자 초대</h2>
+      <input type="text" id="invite-user-id" placeholder="사용자 ID">
+      <button onclick="inviteUser()">초대</button>
     </div>
   </div>
 
@@ -164,10 +172,7 @@
       <div id="card-comments-list"></div>
     </div>
   </div>
-
 </div>
-
 <script src="scripts.js"></script>
 </body>
-
 </html>
