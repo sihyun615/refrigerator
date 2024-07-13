@@ -5,12 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>칸반 보드</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+          integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"
           integrity="sha512-m93xggmOYckdyFONd+UL1EyM3n4sEY2/o7SMXRx7CeOXgfyfYQ2nA9M1uHheDr5O3zOL1bqswH+/PiIoWB6zAA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
+
 <body>
-<div class="container">
+<!--메뉴-->
+<div class="nav">
+  <div class="nav-see active" id="collection-link">
+    모아보기
+  </div>
+  <div class="nav-search" id="explore-link">
+    전체 카드 조회
+  </div>
+</div>
+
+<div id="collection-section">
   <!-- 헤더 -->
   <div class="header">
     <button id="board-create-button" class="header-button" onclick="showBoardCreationModal()">보드 생성</button>
@@ -173,6 +186,23 @@
     </div>
   </div>
 </div>
+</div>
+
+<div id="explore-section" style="display: none;">
+  <div id="search-section">
+    <div id="toggle-search-options">
+      <label><input type="radio" name="search-option" value="all" checked> 전체</label>
+      <label><input type="radio" name="search-option" value="assignee"> 작업자</label>
+      <label><input type="radio" name="search-option" value="status"> 상태</label>
+    </div>
+    <input type="text" id="query" placeholder="검색어 입력">
+  </div>
+  <div id="search-result-box">
+
+  </div>
+</div>
+
+
 <script src="scripts.js"></script>
 </body>
 </html>
