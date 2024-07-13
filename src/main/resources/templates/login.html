@@ -53,7 +53,7 @@
 
     $.ajax({
       type: "POST",
-      url: `/users/login`,
+      url: `http://localhost:8080/users/login`,
       contentType: "application/json",
       data: JSON.stringify({userName: userName, password: password}),
     })
