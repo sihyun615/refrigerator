@@ -1,5 +1,6 @@
 var boards = []; // 배열 초기화
 
+
 $(document).ready(function () {
   const auth = getToken();
   if (!auth) {
@@ -31,11 +32,27 @@ $(document).ready(function () {
     if (e.key == 'Enter') {
       execSearch();
     }
-
   });
-}
 
+  $('#collection-section').show();
+  $('#explore-section').hide();
 
+  $('.nav div.nav-see').on('click', function () {
+    $('div.nav-see').addClass('active');
+    $('div.nav-search').removeClass('active');
+
+    $('#collection-section').show();
+    $('#explore-section').hide();
+  })
+  $('.nav div.nav-search').on('click', function () {
+    $('div.nav-see').removeClass('active');
+    $('div.nav-search').addClass('active');
+
+    $('#collection-section').hide();
+    $('#explore-section').show();
+  })
+
+});
 
 // 쿠키에서 특정 이름의 값을 가져오는 함수
 function getCookie(name) {
@@ -63,14 +80,16 @@ function getToken() {
   return auth;
 }
 
-function deleteCookie(name) {
-  document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+// 보드 생성 모달 보이기
+function showBoardCreationModal() {
+  var modal = document.getElementById('board-creation-modal');
+  modal.style.display = 'block';
 }
 
-function logout() {
-  // 토큰 삭제
-  deleteCookie('Authorization');
-  window.location.href = '/users/login-page';
+// 보드 생성 모달 숨기기
+function hideBoardCreationModal() {
+  var modal = document.getElementById('board-creation-modal');
+  modal.style.display = 'none';
 }
 
 // 보드 생성 함수
@@ -140,19 +159,6 @@ function addBoardToSidebar(board) {
   boardList.appendChild(boardItem);
 }
 
-
-// 보드 생성 모달 보이기
-function showBoardCreationModal() {
-  var modal = document.getElementById('board-creation-modal');
-  modal.style.display = 'block';
-}
-
-// 보드 생성 모달 숨기기
-function hideBoardCreationModal() {
-  var modal = document.getElementById('board-creation-modal');
-  modal.style.display = 'none';
-}
-
 // 보드 표시 함수
 function displayBoard(board) {
   var kanbanBoard = document.getElementById('kanban-board');
@@ -166,18 +172,18 @@ function displayBoard(board) {
             <button onclick="showColumnCreationModal('${board.boardName}')">컬럼 추가</button>
         </div>
     `;
+  // 저장된 컬럼들 표시
   displayColumns(board);
 }
 
 // 보드 수정 모달 열기 함수
 function openEditBoardModal(boardId) {
   var modal = document.getElementById('edit-board-modal');
-
   var board = boards.find(b => b.boardId === parseInt(boardId, 10));
 
   if (board) {
-    document.getElementById('edit-board-name').value = board.title;
-    document.getElementById('edit-board-description').value = board.content;
+    document.getElementById('edit-board-name').value = board.boardName;
+    document.getElementById('edit-board-description').value = board.boardInfo;
 
     // 저장 버튼에 클릭 이벤트 리스너 추가
     var saveButton = document.getElementById('save-board-button');
@@ -223,8 +229,8 @@ function saveBoardChanges(boardId) {
   }
 
   // 보드 정보 업데이트
-  board.title = newTitle;
-  board.content = newContent;
+  board.boardName = newTitle;
+  board.boardInfo = newContent;
 
   var updatedBoard = {
     boardName: newTitle,
@@ -422,7 +428,7 @@ function createColumn() {
   }
 
   // 보드 찾기
-  var board = boards.find(b => b.boardName === boardTitle);
+  var board = boards.find(b => b.title === boardTitle);
   if (board) {
     // 컬럼 추가
     board.columns.push({
@@ -585,7 +591,7 @@ function hideCardEditModal() {
 
 // 저장된 컬럼들 표시
 function displayColumns(board) {
-  var columnsContainer = document.getElementById(`columns-${board.title}`);
+  var columnsContainer = document.getElementById(`columns-${board.boardName}`);
   columnsContainer.innerHTML = ''; // 초기화
 
   board.columns.forEach(function(column, columnIndex) {
@@ -833,7 +839,7 @@ function showColumnEditModal(boardTitle, columnIndex, currentColumnName) {
 
 // 컬럼 이름 업데이트 함수
 function updateColumnName(boardTitle, columnIndex, newColumnName) {
-  var board = boards.find(b => b.title === boardTitle);
+  var board = boards.find(b => b.boardName === boardTitle);
   if (board && board.columns && board.columns[columnIndex]) {
     board.columns[columnIndex].name = newColumnName;
     displayColumns(board); // 변경된 컬럼 표시
@@ -896,7 +902,7 @@ function hideCardEditModal() {
 
 // 저장된 컬럼들 표시
 function displayColumns(board) {
-  var columnsContainer = document.getElementById(`columns-${board.title}`);
+  var columnsContainer = document.getElementById(`columns-${board.boardName}`);
   columnsContainer.innerHTML = ''; // 초기화
 
   board.columns.forEach(function(column, columnIndex) {
@@ -913,7 +919,7 @@ function displayColumns(board) {
     editColumnButton.textContent = '컬럼수정';
     editColumnButton.classList.add('edit-column-button');
     editColumnButton.onclick = function() {
-      showColumnEditModal(board.title, columnIndex, column.name);
+      showColumnEditModal(board.boardName, columnIndex, column.name);
     };
     columnElement.appendChild(editColumnButton);
 
@@ -972,7 +978,37 @@ function displayColumns(board) {
   });
 }
 
+function execSearch() {
+  /**
+   * 검색어 input id: query
+   * 검색결과 목록: #search-result-box
+   * 검색결과 HTML 만드는 함수: addHTML
+   */
+      // 1. 검색창의 입력값을 가져온다.
+  let query = $('#query').val();
 
+  // 2. 검색창 입력값을 검사하고, 입력하지 않았을 경우 focus.
+  if (query == '') {
+    alert('검색어를 입력해주세요');
+    $('#query').focus();
+    return;
+  }
+  // // 3. GET /api/search?query=${query} 요청
+  // $.ajax({
+  //     type: 'GET',
+  //     url: `/api/search?query=${query}`,
+  //     success: function (response) {
+  //         $('#search-result-box').empty();
+  //         // 4. for 문마다 itemDto를 꺼내서 HTML 만들고 검색결과 목록에 붙이기!
+  //         for (let i = 0; i < response.length; i++) {
+  //             let itemDto = response[i];
+  //             let tempHtml = addHTML(itemDto);
+  //             $('#search-result-box').append(tempHtml);
+  //         }
+  //     },
+  //     error(error, status, request) {
+  //         logout();
+  //     }
+  // })
 
-// 초기화 함수 호출
-initialize();
+}
