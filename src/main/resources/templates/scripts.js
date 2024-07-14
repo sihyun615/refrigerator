@@ -363,7 +363,7 @@ function hideEditBoardModal() {
 }
 // 컬럼 생성 모달 닫기
 function hideColumnEditModal() {
-  var modal = document.getElementById('column-creation-modal');
+  var modal = document.getElementById('edit-column-modal');
   modal.style.display = 'none';
 }
 
@@ -665,7 +665,7 @@ function displayColumns(board) {
     editColumnButton.textContent = '컬럼수정';
     editColumnButton.classList.add('edit-column-button');
     editColumnButton.onclick = function() {
-      showColumnEditModal(board.title, columnIndex, column.name);
+      showColumnEditModal(board.id, columnIndex, column.id);
     };
     columnElement.appendChild(editColumnButton);
 
@@ -859,7 +859,7 @@ function hideCardDeleteModal() {
 initialize();
 
 // 컬럼 수정 모달 열기 함수
-function showColumnEditModal(boardTitle, columnIndex, currentColumnName) {
+function showColumnEditModal(boardId, columnIndex, currentColumnId) {
   var modal = document.getElementById('edit-column-modal');
   var editColumnNameInput = document.getElementById('edit-column-name');
   var saveColumnButton = document.getElementById('save-column-button');
@@ -976,7 +976,7 @@ function displayColumns(board) {
     editColumnButton.textContent = '컬럼수정';
     editColumnButton.classList.add('edit-column-button');
     editColumnButton.onclick = function() {
-      showColumnEditModal(board.boardName, columnIndex, column.name);
+      showColumnEditModal(board.id, columnIndex, column.id);
     };
     columnElement.appendChild(editColumnButton);
 
