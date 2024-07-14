@@ -518,7 +518,7 @@ function createColumn() {
 }
 
 // 컬럼 삭제 확인 모달 보이기
-function confirmDeleteColumn(boardTitle, columnIndex, event) {
+function confirmDeleteColumn(columnId, boardId, columnIndex,event) {
     event.stopPropagation(); // 이벤트 전파 중지
 
     var modal = document.getElementById('column-delete-modal');
@@ -533,24 +533,42 @@ function confirmDeleteColumn(boardTitle, columnIndex, event) {
 
     // 삭제 동작 설정
     newButton.addEventListener('click', function () {
-        deleteColumn(boardTitle, columnIndex);
+        deleteColumn(columnId, boardId,columnIndex);
     });
 }
 
 // 컬럼 삭제 함수
-function deleteColumn(boardTitle, columnIndex) {
-    // 보드 찾기
-    var board = boards.find(b => b.boardName === boardTitle);
-    if (board && columnIndex !== undefined && columnIndex < board.columns.length) {
-        // 컬럼 삭제
-        board.columns.splice(columnIndex, 1);
-
-        // 보드 다시 표시
-        displayBoard(board);
-
-        // 삭제 확인 모달 닫기
-        hideColumnDeleteModal();
+function deleteColumn(columnId, boardId, columnIndex) {
+    const auth = getToken();
+    if (!auth) {
+        window.location.href = '/users/login-page';
+        return;
     }
+
+    $.ajax({
+        url: 'http://localhost:8080/admin/columns/' + columnId,
+        type: 'DELETE',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+        },
+        success: function() {
+            // 보드 찾기
+            var board = boards.find(b => b.boardId === boardId);
+            if (board && columnIndex !== undefined && columnIndex < board.columns.length) {
+                // 컬럼 삭제
+                board.columns.splice(columnIndex, 1);
+
+                // 보드 다시 표시
+                displayBoard(board);
+
+                // 삭제 확인 모달 닫기
+                hideColumnDeleteModal();
+            }
+        },
+        error: function() {
+            alert('컬럼 삭제에 실패했습니다. 다시 시도해주세요.');
+        }
+    });
 }
 
 // 컬럼 삭제 확인 모달 닫기
@@ -726,7 +744,7 @@ function displayColumns(board) {
         deleteColumnButton.textContent = '컬럼삭제';
         deleteColumnButton.classList.add('delete-column-button');
         deleteColumnButton.onclick = function (event) {
-            confirmDeleteColumn(board.title, columnIndex, event);
+            confirmDeleteColumn(column.columnId, board.boardId,columnIndex, event);
         };
         columnElement.appendChild(deleteColumnButton);
 
