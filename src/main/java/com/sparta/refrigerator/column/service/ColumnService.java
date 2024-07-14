@@ -32,7 +32,7 @@ public class ColumnService {
     private final UserService userService;
 
     @Transactional
-    public void addColumn(Long boardId, ColumnRequestDto requestDto, User user) {
+    public ColumnResponseDto addColumn(Long boardId, ColumnRequestDto requestDto, User user) {
 
         Board checkBoard = boardService.findById(boardId);
         User checkUser = userService.findById(user.getId());
@@ -53,6 +53,7 @@ public class ColumnService {
 
         Columns columns = new Columns(checkBoard, requestDto, checkUser, maxIndex);
         columnRepository.save(columns);
+        return new ColumnResponseDto(columns);
     }
 
     @Transactional
@@ -75,14 +76,11 @@ public class ColumnService {
 
         List<ColumnResponseDto> responseDtos = new ArrayList<>();
 
-        for (Columns columns : columnsList) {
-            ColumnResponseDto responseDto = ColumnResponseDto.builder()
-                .columnName(columns.getColumnName())
-                .columnIndex(columns.getColumnIndex())
-                .build();
-
+        for (Columns column : columnsList) {
+            ColumnResponseDto responseDto = new ColumnResponseDto(column);
             responseDtos.add(responseDto);
         }
+
         return responseDtos;
     }
 

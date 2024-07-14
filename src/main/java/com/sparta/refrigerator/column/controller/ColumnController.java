@@ -23,11 +23,11 @@ public class ColumnController {
     private final ColumnService columnService;
 
     @PostMapping("/admin/boards/{boardId}/columns")
-    public ResponseEntity<StatusCommonResponse> addColumn(@PathVariable(name = "boardId") Long boardId,
+    public ResponseEntity<DataCommonResponse<ColumnResponseDto>> addColumn(@PathVariable(name = "boardId") Long boardId,
         @RequestBody @Valid ColumnRequestDto requestDto,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        columnService.addColumn(boardId, requestDto, userDetails.getUser());
-        StatusCommonResponse response = new StatusCommonResponse(201, "컬럼 추가되었습니다.");
+        ColumnResponseDto responseDto = columnService.addColumn(boardId, requestDto, userDetails.getUser());
+        DataCommonResponse response = new DataCommonResponse(201, "컬럼 추가되었습니다.",responseDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

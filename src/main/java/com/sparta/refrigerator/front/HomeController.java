@@ -13,8 +13,8 @@ public class HomeController {
     public String style() {
         return "styles.css";
     }
-    @GetMapping("/scripts.js")
+    @GetMapping("/scripts2.js")
     public String script() {
-        return "scripts.js";
+        return "scripts2.js";
     }
 }
