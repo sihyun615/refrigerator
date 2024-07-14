@@ -123,7 +123,8 @@ function createBoard() {
       xhr.setRequestHeader('Authorization', auth);
     },
     success: function(data) {
-      var boardId = data.data.id;
+      console.log(data);
+      var boardId = data.data.boardId;
       boards.push({ ...board, boardId });
       addBoardToSidebar({ ...board, boardId });
       hideBoardCreationModal();
@@ -139,7 +140,7 @@ function createBoard() {
 
 // 사이드바에 보드 이름 추가
 function addBoardToSidebar(board) {
-  console.log(board.boardId); // 보드 ID 출력
+  console.log(board); // 보드 ID 출력
   var boardList = document.getElementById('board-list');
 
   var boardItem = document.createElement('div');
@@ -387,7 +388,15 @@ function hideInviteUserModal() {
 
 // 사용자 초대 함수
 function inviteUser() {
-  var boardTitle = document.getElementById('invite-user-modal').dataset.boardTitle;
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+
+  var modal = document.getElementById('invite-user-modal');
+  var boardId = modal.dataset.id;
+  console.log(boardId);
   var userId = document.getElementById('invite-user-id').value;
 
   if (userId.trim() === '') {
@@ -395,13 +404,27 @@ function inviteUser() {
     return;
   }
 
-  // 보드 찾기
-  var board = boards.find(b => b.boardName === boardTitle);
-  if (board) {
-    // 초대 로직 추가 (예: 서버에 요청 보내기)
-    alert(`${userId}님을 초대했습니다.`);
-    hideInviteUserModal();
-  }
+  // AJAX 요청
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/admin/boards/' + boardId + '/invitation', true);
+  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+  xhr.setRequestHeader('Authorization', auth);
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        alert(`${userId}님을 초대했습니다.`);
+        hideInviteUserModal();
+        // 입력 필드 초기화
+        document.getElementById('invite-user-id').value = '';
+      } else {
+        alert('초대에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
+  };
+
+  var data = JSON.stringify({ userName: userId });
+  xhr.send(data);
 }
 
 // 컬럼 추가 모달 보이기
