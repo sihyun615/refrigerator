@@ -101,15 +101,16 @@ public class BoardService {
 
     //Board 전체 조회
     @Transactional(readOnly = true)
-    public List<BoardResponseDTO> viewAllBoard(int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
-        Page<Board> boardPage = boardRepository.findAllByOrderByCreatedAtDesc(pageable);
+    public List<BoardResponseDTO> viewAllBoard() {
+        List<Board> boardList = boardRepository.findAllByOrderByCreatedAtDesc();
 
-        if (boardPage.isEmpty()) {
+        if (boardList.isEmpty()) {
             throw new DataNotFoundException("먼저 작성하여 소식을 알려보세요!");
         }
-        List<Board> boardList = boardPage.getContent();
-        return boardList.stream().map(BoardResponseDTO::new).collect(Collectors.toList());
+
+        return boardList.stream()
+            .map(BoardResponseDTO::new)
+            .toList();
     }
 
     @Transactional(readOnly = true)
