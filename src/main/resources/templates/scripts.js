@@ -373,7 +373,7 @@ function hideEditBoardModal() {
 }
 // 컬럼 생성 모달 닫기
 function hideColumnEditModal() {
-  var modal = document.getElementById('edit-column-modal');
+  var modal = document.getElementById('column-creation-modal');
   modal.style.display = 'none';
 }
 
