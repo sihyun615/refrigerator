@@ -982,26 +982,60 @@ function initializeSortableCardContainer(column) {
     });
 }
 
+// 컬럼 순서변경
 function initializeSortableColumns(boardContent) {
     new Sortable(boardContent.querySelector(".columns"), {
         group: "columns",
         animation: 150,
         handle: ".column > span", // 컬럼 이름을 드래그 핸들로 사용
         ghostClass: "blue-background-class",
-        onEnd: function (evt) {
+        onEnd: async function (evt) {
             const oldIndex = evt.oldIndex;
             const newIndex = evt.newIndex;
             const boardTitle = boardContent.querySelector('h2').textContent;
-            const board = boards.find(b => b.title === boardTitle);
+            const board = boards.find(b => b.boardName === boardTitle);
 
             if (board) {
+                var boardId = board.boardId;
                 const movedColumn = board.columns.splice(oldIndex, 1)[0];
+                var columnId = movedColumn.columnId;
                 board.columns.splice(newIndex, 0, movedColumn);
-                displayColumns(board); // 변경 사항 반영하여 다시 그리기
+                displayColumns(board);
+                // 변경 사항 반영하여 다시 그리기
+
+                // 백엔드로 컬럼 이동 요청 보내기
+                try {
+
+                    console.log(`Sending request to move column: ${columnId} to index: ${newIndex}, boardId : ${boardId}`);
+                    const response = await fetch(`/admin/boards/${boardId}/columns/${columnId}/transfer`, {
+                        method: 'PUT',
+
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': auth
+                        },
+
+                        body: JSON.stringify({
+                            columnIndex: newIndex
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('컬럼 이동 요청 실패');
+                    }
+
+                    const result = await response.json();
+                    console.log(result.message); // 컬럼 이동되었습니다.
+                } catch (error) {
+                    console.error('Error:', error);
+                    // 여기서 오류 메시지를 사용자에게 보여줄 수 있습니다.
+                }
             }
         },
     });
 }
+
+
 
 // 모든 컬럼과 보드에 Sortable 초기화
 function initializeSortable() {
@@ -1014,6 +1048,12 @@ function initializeSortable() {
         initializeSortableColumns(board);
     });
 }
+
+// 초기화 함수 호출
+document.addEventListener('DOMContentLoaded', () => {
+    initializeSortable();
+});
+
 
 
 function execSearch() {
