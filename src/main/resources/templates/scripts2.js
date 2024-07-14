@@ -171,14 +171,69 @@ function addBoardToSidebar(board) {
     `;
 
     boardItem.addEventListener('click', function () {
-        displayBoard(board);
+        fetchAndDisplayBoard(board.boardId);
     });
 
     boardList.appendChild(boardItem);
 }
 
+// 보드 조회 함수
+/*function fetchBoard(boardId) {
+    const auth = getToken();
+    if (!auth) {
+        window.location.href = '/users/login-page';
+        return;
+    }
+
+    $.ajax({
+        url: `/boards/${boardId}`,
+        type: 'GET',
+        contentType: 'application/json',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+        },
+        success: function(data) {
+            var board = data.board;
+            displayBoard(board); // 보드 표시 함수 호출
+        },
+        error: function() {
+            console.error('보드 조회 중 오류가 발생했습니다.');
+        }
+    });
+}*/
+
+// 컬럼 전체 조회 함수
+function fetchColumns(boardId) {
+    const auth = getToken();
+    if (!auth) {
+        window.location.href = '/users/login-page';
+        return;
+    }
+
+    $.ajax({
+        url: 'http://localhost:8080/boards/' + boardId + '/columns',
+        type: 'GET',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+        },
+        success: function(data) {
+            console.log("Fetched columns data:", data.data); // 콘솔 로그 추가
+            var board = boards.find(b => b.boardId === parseInt(boardId, 10));
+            console.log(board);
+            if (board) {
+                board.columns = data.data || [];
+                displayColumns(board);
+                // initializeSortableColumns(kanbanBoard.querySelector('.board-content'));
+            }
+        },
+        error: function() {
+            alert('컬럼 조회에 실패했습니다. 다시 시도해주세요.');
+        }
+    });
+}
+
 // 보드 표시 함수
-function displayBoard(board) {
+/*function displayBoard(board) {
     var kanbanBoard = document.getElementById('kanban-board');
     kanbanBoard.innerHTML = `
         <div class="board-content">
@@ -190,11 +245,54 @@ function displayBoard(board) {
             <button onclick="showColumnCreationModal('${board.boardId}')">컬럼 추가</button>
         </div>
     `;
-    // 저장된 컬럼들 표시
+    // 컬럼들 조회 및 표시
+    //fetchColumns(board.boardId);
     displayColumns(board);
 
     // Sortable 초기화
     initializeSortableColumns(kanbanBoard.querySelector('.board-content'));
+}*/
+
+function fetchAndDisplayBoard(boardId) {
+    const auth = getToken();
+    if (!auth) {
+        window.location.href = '/users/login-page';
+        return;
+    }
+
+    $.ajax({
+        url: `http://localhost:8080/boards/${boardId}`,
+        type: 'GET',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+        },
+        success: function(data) {
+            var board = data.data;
+
+            // 보드 표시
+            var kanbanBoard = document.getElementById('kanban-board');
+            kanbanBoard.innerHTML = `
+                <div class="board-content">
+                    <h2>${board.boardName}</h2>
+                    <p>${board.boardInfo}</p>
+                    <div class="columns" id="columns-${board.boardName}">
+                        <!-- 컬럼들이 여기에 추가됩니다 -->
+                    </div>
+                    <button onclick="showColumnCreationModal('${board.boardId}')">컬럼 추가</button>
+                </div>
+            `;
+
+            // 컬럼들 표시
+            board.columns = data.data || [];
+            displayColumns(board);
+
+            // Sortable 초기화
+            initializeSortableColumns(kanbanBoard.querySelector('.board-content'));
+        },
+        error: function() {
+            console.error('보드 조회 중 오류가 발생했습니다.');
+        }
+    });
 }
 
 // 보드 수정 모달 열기 함수
@@ -598,7 +696,6 @@ function createCard() {
         window.location.href = '/users/login-page';
         return;
     }
-
     var modal = document.getElementById('card-creation-modal');
     console.log(modal.dataset);
     console.log(modal.dataset.boardId);
@@ -609,63 +706,64 @@ function createCard() {
     var cardContent = document.getElementById('card-content').value;
     var cardAssignee = document.getElementById('card-assignee').value;
     var cardDueDate = document.getElementById('card-due-date').value;
-
-    if (cardTitle.trim() === '') {
-        alert('카드 제목을 입력해주세요.');
-        return;
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/boards/' + boardId + '/columns/' + columnId + '/cards', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    xhr.setRequestHeader('Authorization', auth);
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 201) {
-                console.log('카드가 성공적으로 생성되었습니다.');
-                var board = boards.find(b => b.boardId === parseInt(boardId, 10));
-                console.log(board);
-
-                if (board) {
-                    // 해당 컬럼 찾기
-                    var column = board.columns.find(c => c.columnId === parseInt(columnId, 10));
-
-                    if (column) {
-                        // 컬럼에 cards 배열이 없으면 생성
-                        if (!column.cards) {
-                            column.cards = [];
-                        }
-
-                        // 새 카드 객체 생성
-                        var newCard = {
-                            cardId: Date.now(), // 임시 ID로 현재 시간 사용
-                            title: cardTitle,
-                            content: cardContent,
-                            collaborator: cardAssignee,
-                            deadline: cardDueDate
-                        };
-
-                        // 카드 배열에 새 카드 추가
-                        column.cards.push(newCard);
-                    }
-                }
-
-                hideCardCreationModal();
-                displayBoard(board);
-            } else {
-                alert('카드 생성에 실패했습니다. 다시 시도해주세요.');
-            }
-        }
-    };
-
-    var data = JSON.stringify({
+    console.log(cardDueDate);
+    console.log(typeof cardDueDate);
+    var card = {
         title: cardTitle,
         content: cardContent,
         collaborator: cardAssignee,
         deadline: cardDueDate
+    };
+    if (cardTitle.trim() === '') {
+        alert('카드 제목을 입력해주세요.');
+        return;
+    }
+    $.ajax({
+        url: `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards`,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(card),
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+        },
+        success: function (data) {
+            console.log(data.data);
+            console.log(data.data.cardId);
+            var cardId = data.data.id;
+            // 보드 찾기
+            var board = boards.find(b => b.boardId === parseInt(boardId, 10));
+            if (board) {
+                var column = board.columns.find(
+                    c => c.columnId === parseInt(columnId, 10));
+                if (column) {
+                    // 컬럼에 cards 배열이 없으면 생성
+                    if (!column.cards) {
+                        column.cards = [];
+                    }
+                    // 새 카드 객체 생성
+                    var newCard = {
+                        cardId: cardId,
+                        title: cardTitle,
+                        content: cardContent,
+                        collaborator: cardAssignee,
+                        deadline: cardDueDate
+                    };
+                    // 카드 배열에 새 카드 추가
+                    column.cards.push(newCard);
+                }
+                // 모달 닫기
+                hideCardCreationModal();
+                // 보드 다시 표시
+                displayBoard(board);
+
+                console.log(cardId);
+            }
+        },
+        error: function () {
+            alert('카드 생성에 실패했습니다. 다시 시도해주세요.');
+        }
     });
-    xhr.send(data);
+
 }
 
 
@@ -725,6 +823,7 @@ function hideCardEditModal() {
 
 // 저장된 컬럼들 표시
 function displayColumns(board) {
+    console.log("Displaying columns for board:", board); // 콘솔 로그 추가
     var columnsContainer = document.getElementById(`columns-${board.boardName}`);
     columnsContainer.innerHTML = ''; // 초기화
     columnsContainer.classList.add('columns'); // Sortable을 위한 클래스 추가
@@ -786,7 +885,7 @@ function displayColumns(board) {
             deleteCardButton.textContent = '카드삭제';
             deleteCardButton.classList.add('delete-card-button');
             deleteCardButton.onclick = function (event) {
-                confirmDeleteCard(board.title, columnIndex, cardIndex, event);
+                confirmDeleteCard(board.boardId, columnIndex, cardIndex, event);
             };
             cardElement.appendChild(deleteCardButton);
 
@@ -892,7 +991,7 @@ function hideCardDetailsModal() {
 }
 
 // 카드 삭제 확인 모달 보이기
-function confirmDeleteCard(boardTitle, columnIndex, cardIndex, event) {
+function confirmDeleteCard(boardId, columnIndex, cardIndex, event) {
     event.stopPropagation(); // 이벤트 전파 중지
 
     var modal = document.getElementById('card-delete-modal');
@@ -907,23 +1006,44 @@ function confirmDeleteCard(boardTitle, columnIndex, cardIndex, event) {
 
     // 삭제 동작 설정
     newButton.addEventListener('click', function () {
-        deleteCard(boardTitle, columnIndex, cardIndex);
+        deleteCard(boardId, columnIndex, cardIndex);
     });
 }
 
 // 카드 삭제 함수
-function deleteCard(boardTitle, columnIndex, cardIndex) {
+function deleteCard(boardId, columnIndex, cardIndex) {
+    const auth = getToken();
+    if (!auth) {
+        window.location.href = '/users/login-page';
+        return;
+    }
+
     // 보드 찾기
-    var board = boards.find(b => b.title === boardTitle);
-    if (board && columnIndex !== undefined && columnIndex < board.columns.length && cardIndex !== undefined && cardIndex < board.columns[columnIndex].cards.length) {
-        // 카드 삭제
-        board.columns[columnIndex].cards.splice(cardIndex, 1);
+    var board = boards.find(b => b.boardId === parseInt(boardId, 10));
+    var columnId = board.columns[columnIndex].columnId;
+    var cardId = board.columns[columnIndex].cards[cardIndex].cardId;
 
-        // 다시 보드 표시
-        displayBoard(board);
+    if (board && columnIndex !== undefined && cardIndex !== undefined) {
+        // AJAX 요청 보내기
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', `/boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+        xhr.setRequestHeader('Authorization', auth);
 
-        // 삭제 확인 모달 닫기
-        hideCardDeleteModal();
+        xhr.onreadystatechange = function() {
+            if (xhr.status === 200) {
+
+                // 카드 삭제 성공
+                board.columns[columnIndex].cards.splice(cardIndex, 1);
+                // 다시 보드 표시
+                displayBoard(board);
+                // 삭제 확인 모달 닫기
+                hideCardDeleteModal();
+            } else {
+                // 카드 삭제 실패
+                alert('카드 삭제에 실패했습니다.');
+             }
+        };
+        xhr.send();
     }
 }
 
