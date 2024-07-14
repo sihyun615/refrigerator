@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BoardController {
 
-    private static final int PAGE_SIZE = 5;
-
     private final BoardService boardService;
 
     //Board 생성
@@ -90,9 +88,8 @@ public class BoardController {
 
     //Board 전체 조회
     @GetMapping("/boards")
-    public ResponseEntity<DataCommonResponse<List<BoardResponseDTO>>> viewAllBoard(
-        @RequestParam(value = "page", defaultValue = "0") int page) {
-        List<BoardResponseDTO> responseDTOList = boardService.viewAllBoard(page, PAGE_SIZE);
+    public ResponseEntity<DataCommonResponse<List<BoardResponseDTO>>> viewAllBoard() {
+        List<BoardResponseDTO> responseDTOList = boardService.viewAllBoard();
         DataCommonResponse<List<BoardResponseDTO>> response = new DataCommonResponse<>(200,
             "보드 전체 조회 성공하였습니다.", responseDTOList);
         return new ResponseEntity<>(response, HttpStatus.OK);
