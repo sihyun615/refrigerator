@@ -438,21 +438,33 @@ function inviteUser() {
 }
 
 // 컬럼 추가 모달 보이기
-function showColumnCreationModal(boardTitle) {
+function showColumnCreationModal(boardId) {
+  console.log(boardId);
   var modal = document.getElementById('column-creation-modal');
   modal.style.display = 'block';
-  modal.dataset.boardTitle = boardTitle; // 모달에 보드 제목 데이터 속성으로 저장
+  console.log(modal.dataset);
+  modal.dataset.id = boardId; // 모달에 보드 제목 데이터 속성으로 저장
 }
 
 // 컬럼 추가 모달 닫기
 function hideColumnCreationModal() {
   var modal = document.getElementById('column-creation-modal');
   modal.style.display = 'none';
+  document.getElementById('column-name').value = '';
 }
 
 // 컬럼 생성 함수
 function createColumn() {
-  var boardTitle = document.getElementById('column-creation-modal').dataset.boardTitle;
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+
+  var modal = document.getElementById('column-creation-modal');
+  var boardId = modal.dataset.id;
+  console.log(modal.dataset);
+  console.log(boardId);
   var columnName = document.getElementById('column-name').value;
 
   if (columnName.trim() === '') {
@@ -460,21 +472,43 @@ function createColumn() {
     return;
   }
 
-  // 보드 찾기
-  var board = boards.find(b => b.title === boardTitle);
-  if (board) {
-    // 컬럼 추가
-    board.columns.push({
-      name: columnName,
-      cards: [] // 컬럼의 카드들을 저장할 배열
-    });
+  // AJAX 요청
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/admin/boards/' + boardId + '/columns', true);
+  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+  xhr.setRequestHeader('Authorization', auth);
 
-    // 모달 닫기
-    hideColumnCreationModal();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        // 보드 찾기
+        var board = boards.find(b => b.boardId === parseInt(boardId, 10));
+        console.log(board);
+        if (board) {
+          // 컬럼 배열이 정의되어 있는지 확인
+          if (!board.columns) {
+            board.columns = [];
+          }
+          // 컬럼 추가
+          board.columns.push({
+            name: columnName,
+            cards: [] // 컬럼의 카드들을 저장할 배열
+          });
 
-    // 보드 다시 표시
-    displayBoard(board);
-  }
+          // 모달 닫기
+          hideColumnCreationModal();
+
+          // 보드 다시 표시
+          displayBoard(board);
+        }
+      } else {
+        alert('컬럼 생성에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
+  };
+
+  var data = JSON.stringify({ columnName: columnName });
+  xhr.send(data);
 }
 
 // 컬럼 삭제 확인 모달 보이기
