@@ -85,11 +85,13 @@ public class ColumnService {
     }
 
     @Transactional
-    public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto,
-        User user) {
+    public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto, User user) {
         Board checkBoard = boardService.findById(boardId);
         Columns checkColumns = findById(columnId);
         User checkUser = userService.findById(user.getId());
+
+        // 디버깅 로그 추가
+        log.info("moveColumn called with boardId: {}, columnId: {}, targetIndex: {}", boardId, columnId, requestDto.getColumnIndex());
 
         // 해당 컬럼을 생성한 ADMIN만이 이동/수정 가능
         if (!checkColumns.getUser().getId().equals(checkUser.getId())) {
@@ -101,7 +103,7 @@ public class ColumnService {
         Long targetIndex = requestDto.getColumnIndex();
 
         // 현재 인덱스와 목표 인덱스가 같으면 아무 작업도 하지 않음
-        if (currentIndex == targetIndex) {
+        if (currentIndex.equals(targetIndex)) {
             return;
         }
 
@@ -109,21 +111,13 @@ public class ColumnService {
         List<Columns> columnsList = columnRepository.findAllByBoardOrderByColumnIndex(checkBoard);
 
         // 이동할 컬럼을 찾기
-        Columns columnsToMove = null;
-        for (Columns columns : columnsList) {
-            if (columns.getId().equals(columnId)) {
-                columnsToMove = columns;
-                break;
-            }
-        }
-
-        // 컬럼이 null인 경우 예외 처리
-        if (columnsToMove == null) {
-            throw new DataNotFoundException("이동할 컬럼을 찾을 수 없습니다.");
-        }
+        Columns columnsToMove = columnsList.stream()
+            .filter(columns -> columns.getId().equals(columnId))
+            .findFirst()
+            .orElseThrow(() -> new DataNotFoundException("이동할 컬럼을 찾을 수 없습니다."));
 
         // 목표 인덱스 범위 확인
-        if (targetIndex < 0 || targetIndex > columnsList.size()) {
+        if (targetIndex < 0 || targetIndex >= columnsList.size()) {
             throw new BadRequestException("목표 인덱스가 범위를 벗어납니다.");
         }
 
@@ -138,6 +132,7 @@ public class ColumnService {
             columnRepository.save(columns);
         }
     }
+
 
     @Transactional(readOnly = true)
     public Columns findById(Long columnId) {
