@@ -46,7 +46,7 @@ public class Card extends TimeStamp {
     private String collaborator;
 
     @Column(nullable = false)
-    private LocalDate deadline;
+    private String deadline;
 
     @Column(name = "card_index", nullable = false)
     private Long cardIndex;

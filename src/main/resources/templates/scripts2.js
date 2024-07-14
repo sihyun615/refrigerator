@@ -1,5 +1,4 @@
-// 보드 목록 데이터
-var boards = [];
+var boards = []; // 배열 초기화
 
 $(document).ready(function () {
   $('#query').on('keypress', function (e) {
@@ -900,9 +899,6 @@ function confirmDeleteCard(boardId, columnIndex, cardIndex, event) {
   newButton.addEventListener('click', function () {
     deleteCard(boardId, columnIndex, cardIndex);
   });
-
-  // // 모달에 카드 ID 설정
-  // modal.dataset.cardId = cardId;
 }
 
 // 카드 삭제 함수
@@ -995,29 +991,64 @@ function updateColumnName(boardTitle, columnIndex, newColumnName) {
   }
 }
 
-// 카드 컨테이너에 Sortable 초기화
+// 카드 순서 변경
 function initializeSortableCardContainer(column) {
   new Sortable(column.querySelector(".cards"), {
     group: "cards",
     animation: 150,
     ghostClass: "blue-background-class",
-    onEnd: function (evt) {
+    onEnd: async function (evt) {
       const oldIndex = evt.oldIndex;
       const newIndex = evt.newIndex;
+      const newColumn = evt.to.closest('.column');
       const newColumnIndex = Array.from(
-          evt.to.closest('.columns').children).indexOf(
-          evt.to.closest('.column'));
+          newColumn.parentNode.children).indexOf(
+          newColumn);
+      const oldColumn = evt.from.closest('.column');
       const oldColumnIndex = Array.from(
-          evt.from.closest('.columns').children).indexOf(
-          evt.from.closest('.column'));
+          oldColumn.parentNode.children).indexOf(
+          oldColumn);
       const boardTitle = column.closest('.board-content').querySelector(
           'h2').textContent;
-      const board = boards.find(b => b.title === boardTitle);
+      const board = boards.find(b => b.boardName === boardTitle);
 
       if (board) {
+        var boardId = board.boardId;
+        var oldColumnId = board.columns[oldColumnIndex].columnId;
+        var newColumnId = board.columns[newColumnIndex].columnId;
         const movedCard = board.columns[oldColumnIndex].cards.splice(oldIndex,
             1)[0];
+        var cardId = movedCard.cardId;
         board.columns[newColumnIndex].cards.splice(newIndex, 0, movedCard);
+
+        // 백엔드로 카드 이동 요청 보내기
+        try {
+          console.log(
+              `Sending request to move card: ${cardId} to index: ${newIndex} in column: ${newColumnId}`);
+          const response = await fetch(
+              `/boards/${boardId}/columns/${oldColumnId}/cards/${cardId}/transfer`,
+              {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': getToken() // JWT 토큰 추가
+                },
+                body: JSON.stringify({
+                  columnId: newColumnId,
+                  cardIndex: newIndex
+                }),
+              });
+
+          if (!response.ok) {
+            throw new Error('카드 이동 요청 실패');
+          }
+
+          const result = await response.json();
+          console.log(result.message); // 카드 이동되었습니다.
+        } catch (error) {
+          console.error('Error:', error);
+          // 여기서 오류 메시지를 사용자에게 보여줄 수 있습니다.
+        }
       }
     },
   });
@@ -1025,58 +1056,58 @@ function initializeSortableCardContainer(column) {
 
 // 컬럼 순서변경
 function initializeSortableColumns(boardContent) {
-    new Sortable(boardContent.querySelector(".columns"), {
-        group: "columns",
-        animation: 150,
-        handle: ".column > span", // 컬럼 이름을 드래그 핸들로 사용
-        ghostClass: "blue-background-class",
-        onEnd: async function (evt) {
-            const oldIndex = evt.oldIndex;
-            const newIndex = evt.newIndex;
-            const boardTitle = boardContent.querySelector('h2').textContent;
-            const board = boards.find(b => b.boardName === boardTitle);
+  new Sortable(boardContent.querySelector(".columns"), {
+    group: "columns",
+    animation: 150,
+    handle: ".column > span", // 컬럼 이름을 드래그 핸들로 사용
+    ghostClass: "blue-background-class",
+    onEnd: async function (evt) {
+      const oldIndex = evt.oldIndex;
+      const newIndex = evt.newIndex;
+      const boardTitle = boardContent.querySelector('h2').textContent;
+      const board = boards.find(b => b.boardName === boardTitle);
 
-            if (board) {
-                var boardId = board.boardId;
-                const movedColumn = board.columns.splice(oldIndex, 1)[0];
-                var columnId = movedColumn.columnId;
-                board.columns.splice(newIndex, 0, movedColumn);
-                displayColumns(board);
-                // 변경 사항 반영하여 다시 그리기
+      if (board) {
+        var boardId = board.boardId;
+        const movedColumn = board.columns.splice(oldIndex, 1)[0];
+        var columnId = movedColumn.columnId;
+        board.columns.splice(newIndex, 0, movedColumn);
+        displayColumns(board);
+        // 변경 사항 반영하여 다시 그리기
 
-                // 백엔드로 컬럼 이동 요청 보내기
-                try {
+        // 백엔드로 컬럼 이동 요청 보내기
+        try {
 
-                    console.log(`Sending request to move column: ${columnId} to index: ${newIndex}, boardId : ${boardId}`);
-                    const response = await fetch(`/admin/boards/${boardId}/columns/${columnId}/transfer`, {
-                        method: 'PUT',
+          console.log(
+              `Sending request to move column: ${columnId} to index: ${newIndex}, boardId : ${boardId}`);
+          const response = await fetch(
+              `/admin/boards/${boardId}/columns/${columnId}/transfer`, {
+                method: 'PUT',
 
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': auth
-                        },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': auth
+                },
 
-                        body: JSON.stringify({
-                            columnIndex: newIndex
-                        }),
-                    });
+                body: JSON.stringify({
+                  columnIndex: newIndex
+                }),
+              });
 
-                    if (!response.ok) {
-                        throw new Error('컬럼 이동 요청 실패');
-                    }
+          if (!response.ok) {
+            throw new Error('컬럼 이동 요청 실패');
+          }
 
-                    const result = await response.json();
-                    console.log(result.message); // 컬럼 이동되었습니다.
-                } catch (error) {
-                    console.error('Error:', error);
-                    // 여기서 오류 메시지를 사용자에게 보여줄 수 있습니다.
-                }
-            }
-        },
-    });
+          const result = await response.json();
+          console.log(result.message); // 컬럼 이동되었습니다.
+        } catch (error) {
+          console.error('Error:', error);
+          // 여기서 오류 메시지를 사용자에게 보여줄 수 있습니다.
+        }
+      }
+    },
+  });
 }
-
-
 
 // 모든 컬럼과 보드에 Sortable 초기화
 function initializeSortable() {
@@ -1089,6 +1120,13 @@ function initializeSortable() {
     initializeSortableColumns(board);
   });
 }
+
+// // 초기화 함수 호출
+// document.addEventListener('DOMContentLoaded', () => {
+//     initializeSortable();
+// });
+//
+//
 
 function execSearch() {
   /**

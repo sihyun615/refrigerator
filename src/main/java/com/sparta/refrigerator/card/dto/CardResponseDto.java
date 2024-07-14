@@ -18,7 +18,7 @@ public class CardResponseDto {
     private String title;
     private String content;
     private String collaborator;
-    private LocalDate deadline;
+    private String deadline;
 
     public CardResponseDto(Card card) {
         this.id = card.getId();
