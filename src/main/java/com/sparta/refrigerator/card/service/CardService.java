@@ -5,22 +5,29 @@ import com.sparta.refrigerator.auth.service.UserService;
 import com.sparta.refrigerator.board.entity.Board;
 import com.sparta.refrigerator.board.repository.InvitationRepository;
 import com.sparta.refrigerator.board.service.BoardService;
+import com.sparta.refrigerator.card.dto.CardMoveRequestDto;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.card.dto.CardResponseDto;
 import com.sparta.refrigerator.card.entity.Card;
 import com.sparta.refrigerator.card.repository.CardRepository;
+import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.column.repository.ColumnRepository;
 import com.sparta.refrigerator.column.service.ColumnService;
+import com.sparta.refrigerator.exception.BadRequestException;
 import com.sparta.refrigerator.exception.CardNotFoundException;
 import com.sparta.refrigerator.exception.DataNotFoundException;
+import com.sparta.refrigerator.exception.ForbiddenException;
 import com.sparta.refrigerator.exception.UserMisMatchException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CardService {
@@ -39,12 +46,8 @@ public class CardService {
         Columns checkColumn = columnService.findById(columnId);
         Board checkBoard = boardService.findById(boardId);
 
-        if (requestDto.getTitle().isEmpty()) {
-            throw new DataNotFoundException("제목을 입력해주기 바랍니다.");
-        }
-
-        if (requestDto.getContent().isEmpty()) {
-            throw new DataNotFoundException("내용을 입력해주시기 바랍니다");
+        if(checkBoard == null) {
+            throw new DataNotFoundException("보드가 존재하지 않습니다");
         }
 
         boolean isBoardUser = invitationRepository.existsByBoardAndUser(checkColumn.getBoard(),
@@ -54,7 +57,11 @@ public class CardService {
             throw new DataNotFoundException("보드에 초대된 사용자가 아닙니다");
         }
 
-        Card card = new Card(requestDto, checkColumn, user, checkBoard);
+        // 카드 인덱스 최댓값 확인
+        Long maxIndex = cardRepository.findMaxCardIndexByColumns(checkColumn);
+        maxIndex = (maxIndex == null) ? 0L : maxIndex + 1;
+
+        Card card = new Card(requestDto, checkColumn, user, checkBoard, maxIndex);
         cardRepository.save(card);
 
         return new CardResponseDto(card);
@@ -116,6 +123,7 @@ public class CardService {
     @Transactional(readOnly = true)
     public CardResponseDto getCard(Long cardId, User user, Long columnId, Long boardId) {
         Board checkBoard = boardService.findById(boardId);
+        Card checkCard = findCard(cardId);
 
         if (checkBoard == null) {
             throw new DataNotFoundException("존재하지 않는 보드입니다");
@@ -135,9 +143,7 @@ public class CardService {
         }
 
         userService.findById(user.getId());
-        return cardRepository.findById(cardId)
-            .map(CardResponseDto::new)
-            .orElseThrow(() -> new DataNotFoundException("선택한 카드가 없습니다"));
+        return new CardResponseDto(checkCard);
     }
 
     @Transactional(readOnly = true)
@@ -212,6 +218,70 @@ public class CardService {
             .map(CardResponseDto::new)
             .collect(Collectors.toList());
     }
+
+    @Transactional
+    public void moveCard(Long boardId, Long columnId, Long cardId, CardMoveRequestDto requestDto, User user) {
+        Board checkBoard = boardService.findById(boardId);
+        Columns checkColumns = columnService.findById(columnId);
+        userService.findById(user.getId());
+
+        // 요청으로부터 이동할 컬럼의 ID와 목표 인덱스를 가져옴
+        Long targetColumnId = requestDto.getColumnId();
+        Long targetCardIndex = requestDto.getCardIndex();
+
+        // 현재 컬럼과 목표 컬럼이 같으면 아무 작업도 하지 않음
+        if (checkColumns.getId().equals(targetColumnId)) {
+            return;
+        }
+
+        // 모든 컬럼을 현재 보드에서 조회
+        List<Columns> columnsList = columnRepository.findAllByBoardOrderByColumnIndex(checkBoard);
+
+        // 이동할 컬럼과 목표 컬럼을 찾기
+        Columns targetColumn = columnService.findById(targetColumnId);
+
+        // 컬럼이 null인 경우 예외 처리
+        if (targetColumn == null) {
+            throw new DataNotFoundException("이동할 컬럼을 찾을 수 없습니다.");
+        }
+
+        // 목표 인덱스 범위 확인
+        List<Card> targetCardList = cardRepository.findByColumns(targetColumn);
+        if (targetCardIndex < 0 || targetCardIndex > targetCardList.size()) {
+            throw new BadRequestException("목표 인덱스가 범위를 벗어납니다.");
+        }
+
+        // 이동할 카드 찾기
+        Card cardToMove = findCard(cardId);
+        if (cardToMove == null) {
+            throw new DataNotFoundException("이동할 카드를 찾을 수 없습니다.");
+        }
+
+        // 현재 컬럼의 카드 목록 갱신
+        List<Card> currentCardList = cardRepository.findByColumns(cardToMove.getColumns());
+        currentCardList.remove(cardToMove);
+
+        // 이동할 카드의 컬럼과 인덱스 업데이트
+        cardToMove.updateColumns(targetColumn);
+        cardToMove.updateCardIndex(targetCardIndex);
+
+        // 목표 컬럼의 카드 목록 갱신
+        targetCardList.add(Math.toIntExact(targetCardIndex), cardToMove);
+
+        // 변경된 순서대로 모든 카드를 저장
+        for (int i = 0; i < currentCardList.size(); i++) {
+            Card card = currentCardList.get(i);
+            card.updateCardIndex(i);
+            cardRepository.save(card);
+        }
+
+        for (int i = 0; i < targetCardList.size(); i++) {
+            Card card = targetCardList.get(i);
+            card.updateCardIndex(i);
+            cardRepository.save(card);
+        }
+    }
+
 
     public Card findCard(Long cardId) {
         return cardRepository.findById(cardId).orElseThrow(
