@@ -180,13 +180,12 @@ function displayBoard(board) {
             <div class="columns" id="columns-${board.boardName}">
                 <!-- 컬럼들이 여기에 추가됩니다 -->
             </div>
-            <button onclick="showColumnCreationModal('${board.boardName}')">컬럼 추가</button>
+            <button onclick="showColumnCreationModal('${board.boardId}')">컬럼 추가</button>
         </div>
     `;
   // 저장된 컬럼들 표시
   displayColumns(board);
 }
-
 // 보드 수정 모달 열기 함수
 function openEditBoardModal(boardId) {
   var modal = document.getElementById('edit-board-modal');
