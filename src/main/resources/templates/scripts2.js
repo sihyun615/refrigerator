@@ -598,13 +598,13 @@ function createCard() {
     }
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/admin/boards/' + boardId + '/columns/' + columnId + '/cards', true);
+    xhr.open('POST', '/boards/' + boardId + '/columns/' + columnId + '/cards', true);
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     xhr.setRequestHeader('Authorization', auth);
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
+            if (xhr.status === 201) {
                 console.log('카드가 성공적으로 생성되었습니다.');
                 var board = boards.find(b => b.boardId === parseInt(boardId, 10));
                 console.log(board);
