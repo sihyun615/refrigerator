@@ -48,6 +48,9 @@ public class Card extends TimeStamp {
     @Column(nullable = false)
     private LocalDate deadline;
 
+    @Column(name = "card_index", nullable = false)
+    private Long cardIndex;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -60,17 +63,20 @@ public class Card extends TimeStamp {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
+
 //    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<Comment> commentList = new ArrayList<>();
 
-    public Card(CardRequestDto requestDto, Columns columns, User user, Board board) {
+    public Card(CardRequestDto requestDto, Columns columns, User user, Board board, Long maxIndex) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.collaborator = requestDto.getCollaborator();
         this.deadline = requestDto.getDeadline();
         this.columns = columns;
         this.user = user;
+        this.cardIndex = maxIndex;
         this.board = board;
+
     }
 
     public void update(CardRequestDto requestDto) {
@@ -79,6 +85,15 @@ public class Card extends TimeStamp {
         this.collaborator = requestDto.getCollaborator();
         this.deadline = requestDto.getDeadline();
     }
+
+    public void updateCardIndex(long index) {
+        this.cardIndex = index;
+    }
+
+    public void updateColumns(Columns columns) {
+        this.columns = columns;
+    }
+
 
 
 }
