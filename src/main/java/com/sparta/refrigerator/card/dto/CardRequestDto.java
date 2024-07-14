@@ -21,5 +21,5 @@ public class CardRequestDto {
     private String content;
 
     private String collaborator;
-    private LocalDate deadline;
+    private String deadline;
 }
