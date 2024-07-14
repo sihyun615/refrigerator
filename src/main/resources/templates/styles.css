@@ -31,10 +31,22 @@ body, html {
   height: 100vh;
 }
 
-#collection-section {
+#all-body {
   flex: 1;
   display: flex;
   flex-direction: row;
+}
+
+#board-card{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#collection-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 
