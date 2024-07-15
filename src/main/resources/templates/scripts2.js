@@ -157,7 +157,7 @@ function createBoard() {
 
 // 사이드바에 보드 이름 추가
 function addBoardToSidebar(board) {
-    console.log(board); // 보드 ID 출력
+    console.log(board);
     var boardList = document.getElementById('board-list');
 
     var boardItem = document.createElement('div');
@@ -171,7 +171,7 @@ function addBoardToSidebar(board) {
     `;
 
     boardItem.addEventListener('click', function () {
-        fetchAndDisplayBoard(board.boardId);
+        fetchBoard(board.boardId);
     });
 
     boardList.appendChild(boardItem);
@@ -253,7 +253,8 @@ function fetchColumns(boardId) {
     initializeSortableColumns(kanbanBoard.querySelector('.board-content'));
 }*/
 
-function fetchAndDisplayBoard(boardId) {
+// 보드 단건 조회 함수
+function fetchBoard(boardId) {
     const auth = getToken();
     if (!auth) {
         window.location.href = '/users/login-page';
@@ -268,31 +269,34 @@ function fetchAndDisplayBoard(boardId) {
         },
         success: function(data) {
             var board = data.data;
-
-            // 보드 표시
-            var kanbanBoard = document.getElementById('kanban-board');
-            kanbanBoard.innerHTML = `
-                <div class="board-content">
-                    <h2>${board.boardName}</h2>
-                    <p>${board.boardInfo}</p>
-                    <div class="columns" id="columns-${board.boardName}">
-                        <!-- 컬럼들이 여기에 추가됩니다 -->
-                    </div>
-                    <button onclick="showColumnCreationModal('${board.boardId}')">컬럼 추가</button>
-                </div>
-            `;
-
-            // 컬럼들 표시
-            board.columns = data.data || [];
-            fetchColumns(board.boardId);
-
-            // Sortable 초기화
-            initializeSortableColumns(kanbanBoard.querySelector('.board-content'));
+            console.log(board);
+            displayBoard(board);
         },
         error: function() {
             console.error('보드 조회 중 오류가 발생했습니다.');
         }
     });
+}
+
+// 보드 표시 함수
+function displayBoard(board) {
+    var kanbanBoard = document.getElementById('kanban-board');
+    kanbanBoard.innerHTML = `
+        <div class="board-content">
+            <h2>${board.boardName}</h2>
+            <p>${board.boardInfo}</p>
+            <div class="columns" id="columns-${board.boardName}">
+                <!-- 컬럼들이 여기에 추가됩니다 -->
+            </div>
+            <button onclick="showColumnCreationModal('${board.boardId}')">컬럼 추가</button>
+        </div>
+    `;
+
+    // 컬럼들 조회 및 표시
+    fetchColumns(board.boardId);
+
+    // Sortable 초기화
+    initializeSortableColumns(kanbanBoard.querySelector('.board-content'));
 }
 
 // 보드 수정 모달 열기 함수
@@ -384,7 +388,7 @@ function saveBoardChanges(boardId) {
 
             // 사이드바 및 칸반보드 업데이트
             redrawSidebar();
-            fetchAndDisplayBoard(board.boardId);
+            fetchBoard(boardId);
 
             // 모달 닫기
             closeModal(document.getElementById('edit-board-modal'));
@@ -603,11 +607,12 @@ function createColumn() {
                     name: columnName,
                     cards: [] // 컬럼의 카드들을 저장할 배열
                 });
+                console.log(board);
                 // 모달 닫기
                 hideColumnCreationModal();
                 //window.location.reload();
                 // 보드 다시 표시
-                fetchAndDisplayBoard(board.boardId);
+                fetchBoard(boardId);
             }
         },
         error: function() {
@@ -658,7 +663,7 @@ function deleteColumn(columnId, boardId, columnIndex) {
                 board.columns.splice(columnIndex, 1);
 
                 // 보드 다시 표시
-                fetchAndDisplayBoard(board.boardId);
+                fetchBoard(boardId);
 
                 // 삭제 확인 모달 닫기
                 hideColumnDeleteModal();
@@ -745,16 +750,18 @@ function createCard() {
                         collaborator: cardAssignee,
                         deadline: cardDueDate
                     };
-
-                    console.log(columnIndex);
+                    if (!board.columns[columnIndex].cards) {
+                        board.columns[columnIndex].cards = [];
+                    }
+                    console.log(board.columns[columnIndex].cards);
                     // 카드 배열에 새 카드 추가
                     board.columns[columnIndex].cards.push(newCard);
                 }
-                console.log(board.columns[columnIndex].cards);
+                console.log(board.columns[columnIndex]);
                 // 모달 닫기
                 hideCardCreationModal();
                 // 보드 다시 표시
-                fetchAndDisplayBoard(board.boardId);
+                fetchBoard(boardId);
             }
         },
         error: function () {
@@ -1038,7 +1045,7 @@ function deleteCard(boardId, columnIndex, cardIndex) {
                 // 카드 삭제 성공
                 board.columns[columnIndex].cards.splice(cardIndex, 1);
                 // 다시 보드 표시
-                fetchAndDisplayBoard(board.boardId);
+                fetchBoard(boardId);
                 // 삭제 확인 모달 닫기
                 hideCardDeleteModal();
             } else {
