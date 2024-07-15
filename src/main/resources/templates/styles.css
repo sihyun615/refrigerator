@@ -37,7 +37,7 @@ body, html {
   flex-direction: row;
 }
 
-#board-card {
+#board-card{
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -50,13 +50,24 @@ body, html {
 }
 
 
+.header {
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #ccc;
+  flex-shrink: 0;
+}
+
 /* 사이드바 스타일 */
 .sidebar {
   width: 250px;
+  display: flex;
+  flex-direction: column;
   background-color: #f0f0f0;
   border-right: 1px solid #ccc;
   overflow-y: auto;
   height: 100vh;
+  flex-shrink: 0;
 }
 
 .sidebar .header {
@@ -138,7 +149,7 @@ body, html {
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   margin-bottom: 10px; /* 컬럼 간 간격 추가 */
 }
 
@@ -176,7 +187,7 @@ body, html {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .column .card h3 {
@@ -198,7 +209,7 @@ body, html {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0,0,0,0.4);
 }
 
 .modal-content {
@@ -241,7 +252,6 @@ body, html {
 #board-delete-modal .modal-content {
   text-align: center;
 }
-
 #board-delete-modal .modal-content button {
   margin: 5px;
   padding: 10px 20px;
@@ -251,7 +261,6 @@ body, html {
   cursor: pointer;
   border-radius: 5px;
 }
-
 #board-delete-modal .modal-content button:hover {
   background-color: #0056b3;
 }
@@ -259,22 +268,6 @@ body, html {
 #explore-section {
   display: flex;
   justify-content: center; /* 화면 가운데 정렬 */
-  flex-direction: column;
-}
-
-.search-result-box {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.card {
-  flex: 0 1 calc(33.33% - 10px); /* 3열로 표시 */
-  box-sizing: border-box;
-  margin: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
 }
 
 input#query {
@@ -304,4 +297,25 @@ input#query::placeholder {
 
 #toggle-search-options label {
   margin-right: 15px;
+}
+
+.search-result-box {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 0 1 calc(33.33% - 10px); /* 3열로 표시 */
+  box-sizing: border-box;
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #F9F9F9;
+}
+
+#explore-section {
+  display: flex;
+  justify-content: center; /* 화면 가운데 정렬 */
+  flex-direction: column;
 }
