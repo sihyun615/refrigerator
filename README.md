@@ -8,7 +8,7 @@
 # 🤝 팀원 / 역할분담
 | 박시현                         | 박민혁                         | 신성훈                         | 홍서영                         | 이세원                         |
 |-------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|
-| [![박시현](https://github.com/user-attachments/assets/2ce70c35-b5ea-461e-96d8-abac6c752fbf)]([https://github.com/sihyun615]) | [![박민혁](https://github.com/hanraeul.png)](https://github.com/hanraeul) | [![신성훈](https://github.com/seonghoon90.png)](https://github.com/seonghoon90) | [![홍서영](https://github.com/hongsy521.png)](https://github.com/hongsy521) | [![이세원](https://github.com/leesw1945.png)](https://github.com/leesw1945) |
+|| [![박시현](https://github.com/user-attachments/assets/2ce70c35-b5ea-461e-96d8-abac6c752fbf)]([https://github.com/sihyun615]) | [![박민혁](https://github.com/hanraeul.png)](https://github.com/hanraeul) | [![신성훈](https://github.com/seonghoon90.png)](https://github.com/seonghoon90) | [![홍서영](https://github.com/hongsy521.png)](https://github.com/hongsy521) | [![이세원](https://github.com/leesw1945.png)](https://github.com/leesw1945) |
 |프로젝트 전체 관리 및 팀원 서포트 / 댓글 구현 / 프론트엔드 연결|카드CRUD / 프론트엔드 연결|보드CRUD / 프론트엔드 구현 / 프론트엔드 연결|컬럼 CRUD / 프론트엔드 연결|회원가입 / 로그인 / 프론트엔드 연결
 
 
