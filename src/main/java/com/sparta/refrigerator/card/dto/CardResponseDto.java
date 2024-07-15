@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CardResponseDto {
 
-    private Long id;
+    private Long cardId;
     private String title;
     private String content;
     private String collaborator;
     private LocalDate deadline;
 
     public CardResponseDto(Card card) {
-        this.id = card.getId();
+        this.cardId = card.getId();
         this.title = card.getTitle();
         this.content = card.getContent();
         this.collaborator = card.getCollaborator();
