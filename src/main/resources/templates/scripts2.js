@@ -1,6 +1,4 @@
 var boards = []; // 배열 초기화
-let currentPage = 1;
-const commentsPerPage = 5;
 
 $(document).ready(function () {
     $('#query').on('keypress', function (e) {
@@ -1141,17 +1139,8 @@ function addComment() {
                 // 입력 필드 초기화
                 document.getElementById('comment-input').value = '';
 
-                // 댓글 개수가 페이지 크기를 초과하면 마지막 댓글 제거
-                if (commentsContainer.children.length > commentsPerPage) {
-                    commentsContainer.removeChild(commentsContainer.lastChild);
-                }
-
-                // 페이지네이션 컨트롤 업데이트
-                currentPage = 1; // 새 댓글을 추가했으므로 첫 페이지로 이동
-                fetchComments(boardId, columnId, cardId, currentPage)
-                .then(commentData => {
-                    addPaginationControls(modal, commentData.comments.length, {id: cardId});
-                });
+                // 댓글 목록 새로고침
+                fetchComments(boardId, columnId, cardId);
             } else {
                 console.error('Invalid server response:', response);
                 alert('서버 응답이 올바르지 않습니다.');
@@ -1164,14 +1153,14 @@ function addComment() {
     });
 }
 
-function fetchComments(boardId, columnId, cardId, page = 1) {
+function fetchComments(boardId, columnId, cardId) {
     const auth = getToken();
     if (!auth) {
         window.location.href = '/users/login-page';
         return Promise.reject('인증 토큰이 없습니다.');
     }
 
-    const url = `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards/${cardId}/comments?page=${page}`;
+    const url = `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards/${cardId}/comments`;
     console.log("Fetching comments from:", url);
 
     return fetch(url, {
@@ -1190,29 +1179,21 @@ function fetchComments(boardId, columnId, cardId, page = 1) {
     .then(data => {
         console.log("Server response:", data);
         if (data && data.data) {
-            return {
-                comments: data.data,
-                totalComments: data.totalComments || data.data.length, // 서버에서 totalComments를 제공하지 않는 경우 현재 페이지의 댓글 수 사용
-                currentPage: page
-            };
+            displayComments(document.getElementById('card-details-modal'), data.data);
         } else {
             console.error('Invalid response data');
-            return { comments: [], totalComments: 0, currentPage: page };
+            displayComments(document.getElementById('card-details-modal'), []);
         }
     })
     .catch(error => {
         console.error('Error:', error);
         alert('댓글 조회에 실패했습니다. 다시 시도해주세요.');
-        return { comments: [], totalComments: 0, currentPage: page };
+        displayComments(document.getElementById('card-details-modal'), []);
     });
 }
 
-
 // 댓글 표시 함수
-function displayComments(container, commentData, cardRef) {
-    var { comments, totalComments } = commentData;
-    console.log("Displaying comments:", {totalComments, currentPage, commentsPerPage});
-
+function displayComments(container, comments) {
     var commentsContainer = container.querySelector('#card-comments-list');
     if (!commentsContainer) {
         commentsContainer = document.createElement('div');
@@ -1225,66 +1206,13 @@ function displayComments(container, commentData, cardRef) {
         var commentElement = document.createElement('div');
         commentElement.classList.add('comment');
         commentElement.innerHTML = `
-      <p>${comment.content}</p>
-      <span class="comment-username">${comment.userName}</span>
-      <span class="comment-timestamp">${new Date(comment.createdAt).toLocaleString()}</span>
-    `;
+            <p>${comment.content}</p>
+            <span class="comment-username">${comment.userName}</span>
+            <span class="comment-timestamp">${new Date(comment.createdAt).toLocaleString()}</span>
+        `;
         commentsContainer.appendChild(commentElement);
     });
-
-    // 페이지네이션 컨트롤 추가
-    addPaginationControls(container, comments.length, cardRef);
 }
-
-//페이지네이션 컨트롤 함수
-function addPaginationControls(container, commentsCount, cardRef) {
-    console.log("Adding pagination controls:", {commentsCount, currentPage, commentsPerPage});
-
-    let paginationContainer = container.querySelector('#pagination-controls');
-    if (!paginationContainer) {
-        paginationContainer = document.createElement('div');
-        paginationContainer.id = 'pagination-controls';
-        container.querySelector('.modal-content').appendChild(paginationContainer);
-    }
-    paginationContainer.innerHTML = '';
-
-    // 현재 페이지의 댓글 수가 페이지당 댓글 수와 같으면 다음 페이지가 있을 수 있음
-    const hasNextPage = commentsCount === commentsPerPage;
-
-    // 이전 페이지 버튼
-    if (currentPage > 1) {
-        const prevButton = document.createElement('button');
-        prevButton.textContent = '이전';
-        prevButton.onclick = () => {
-            currentPage--;
-            fetchComments(container.dataset.boardId, container.dataset.columnId, cardRef.id, currentPage)
-            .then(commentData => {
-                displayComments(container, commentData, cardRef);
-            });
-        };
-        paginationContainer.appendChild(prevButton);
-    }
-
-    // 페이지 번호
-    const pageInfo = document.createElement('span');
-    pageInfo.textContent = `${currentPage}`;
-    paginationContainer.appendChild(pageInfo);
-
-    // 다음 페이지 버튼
-    if (hasNextPage) {
-        const nextButton = document.createElement('button');
-        nextButton.textContent = '다음';
-        nextButton.onclick = () => {
-            currentPage++;
-            fetchComments(container.dataset.boardId, container.dataset.columnId, cardRef.id, currentPage)
-            .then(commentData => {
-                displayComments(container, commentData, cardRef);
-            });
-        };
-        paginationContainer.appendChild(nextButton);
-    }
-}
-
 
 // 카드 상세 정보 모달 보이기
 function showCardDetailsModal(card, boardId, columnId) {
@@ -1312,11 +1240,7 @@ function showCardDetailsModal(card, boardId, columnId) {
     if (dueDateElement) dueDateElement.textContent = card.deadline;
 
     // 댓글 조회 및 표시
-    currentPage = 1;  // 페이지 번호 초기화
-    fetchComments(boardId, columnId, card.id, currentPage)
-    .then(comments => {
-        displayComments(modal, comments, card);
-    });
+    fetchComments(boardId, columnId, card.id);
 
     // 모달 닫기 버튼 이벤트 설정
     var closeButton = document.getElementById('card-details-close-button');
@@ -1332,7 +1256,6 @@ function showCardDetailsModal(card, boardId, columnId) {
         commentButton.onclick = addComment;
     }
 }
-
 // 카드 상세 정보 모달 닫기
 function hideCardDetailsModal() {
     var modal = document.getElementById('card-details-modal');
