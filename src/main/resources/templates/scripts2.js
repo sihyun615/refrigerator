@@ -646,6 +646,11 @@ function createCard() {
         // 보드 다시 표시
         displayBoard(board);
 
+        document.getElementById('card-title').value = '';
+        document.getElementById('card-content').value = '';
+        document.getElementById('card-assignee').value = '';
+        document.getElementById('card-due-date').value = '';
+
         console.log(cardId);
       }
     },
