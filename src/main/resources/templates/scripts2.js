@@ -4,26 +4,33 @@ const commentsPerPage = 5;
 
 $(document).ready(function () {
   $('#query').on('keypress', function (e) {
-    if (e.key == 'Enter') {
-      execSearch();
+    if (e.key === 'Enter') {
+      const searchOption = document.querySelector('input[name="search-option"]:checked').value;
+      if (searchOption === 'assignee') {
+        execSearchAssignee();
+      } else if (searchOption === 'status') {
+        execSearchStatus();
+      } else if (searchOption === 'all') {
+        execSearchAll();
+      }
     }
   });
 
-  $('#collection-section').show();
+  $('#kanban-board').show();
   $('#explore-section').hide();
 
   $('.nav div.nav-see').on('click', function () {
     $('div.nav-see').addClass('active');
     $('div.nav-search').removeClass('active');
 
-    $('#collection-section').show();
+    $('#kanban-board').show();
     $('#explore-section').hide();
   });
   $('.nav div.nav-search').on('click', function () {
     $('div.nav-see').removeClass('active');
     $('div.nav-search').addClass('active');
 
-    $('#collection-section').hide();
+    $('#kanban-board').hide();
     $('#explore-section').show();
   });
 
@@ -55,12 +62,6 @@ $.ajax({
   }
 });
 
-// id 가 query 인 녀석 위에서 엔터를 누르면 execSearch() 함수를 실행하라는 뜻입니다.
-$('#query').on('keypress', function (e) {
-  if (e.key == 'Enter') {
-    execSearch();
-  }
-});
 
 // 쿠키에서 특정 이름의 값을 가져오는 함수
 function getCookie(name) {
@@ -705,6 +706,139 @@ function saveCardEdit(boardTitle, columnIndex, cardIndex) {
   }
 }
 
+
+document.getElementById('query').addEventListener('keypress', function(event) {
+  if (event.key === 'Enter') {
+    searchCards();
+  }
+});
+
+function displaySearchResults(cards) {
+  const searchResultBox = document.getElementById('search-result-box');
+  cards.forEach(card => {
+    const cardElement = document.createElement('div');
+    cardElement.classList.add('card');
+    cardElement.innerHTML = `
+            <h3>${card.title}</h3>
+            <p>${card.content}</p>
+            <p>작업자: ${card.collaborator}</p>
+            <p>마감일: ${card.deadline}</p>
+        `;
+    searchResultBox.appendChild(cardElement);
+  });
+}
+
+//작업자별 조회
+function execSearchAssignee() {
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+  const query = document.getElementById('query').value.trim();
+  const boardId = getCurrentBoardId(); // 현재 보드 ID를 가져오는 함수
+  const searchResultBox = document.getElementById('search-result-box');
+  searchResultBox.innerHTML = ''; // 기존 검색 결과 초기화
+
+
+  fetch(`http://localhost:8080/boards/${boardId}/cards/assignee?collaborator=${encodeURIComponent(query)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': auth
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('카드 검색 요청 실패');
+    }
+    return response.json();
+  })
+  .then(data => {
+    displaySearchResults(data.data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('카드 검색에 실패했습니다. 다시 시도해주세요.');
+  });
+
+}
+
+//상태별 조회
+function execSearchStatus() {
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+  const query = document.getElementById('query').value.trim();
+  const boardId = getCurrentBoardId(); // 현재 보드 ID를 가져오는 함수
+  const searchResultBox = document.getElementById('search-result-box');
+  searchResultBox.innerHTML = ''; // 기존 검색 결과 초기화
+
+  fetch(`http://localhost:8080/boards/${boardId}/cards/status?columnName=${encodeURIComponent(query)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': auth
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('카드 검색 요청 실패');
+    }
+    return response.json();
+  })
+  .then(data => {
+    displaySearchResults(data.data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('카드 검색에 실패했습니다. 다시 시도해주세요.');
+  });
+}
+
+//전체 조회
+function execSearchAll() {
+  const auth = getToken();
+  if (!auth) {
+    window.location.href = '/users/login-page';
+    return;
+  }
+  const boardId = getCurrentBoardId(); // 현재 보드 ID를 가져오는 함수
+  const searchResultBox = document.getElementById('search-result-box');
+  searchResultBox.innerHTML = ''; // 기존 검색 결과 초기화
+
+  fetch(`http://localhost:8080/boards/${boardId}/cards`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': auth
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('카드 검색 요청 실패');
+    }
+    return response.json();
+  })
+  .then(data => {
+    displaySearchResults(data.data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('카드 검색에 실패했습니다. 다시 시도해주세요.');
+  });
+}
+
+
+function getCurrentBoardId() {
+  console.log(document.getElementById('card-creation-modal').dataset);
+  // 현재 보드 ID를 가져오는 로직
+  return document.getElementById('card-creation-modal').dataset.boardId;
+}
+
+
 // 모달 닫기
 function hideCardEditModal() {
   var modal = document.getElementById('edit-card-modal');
@@ -750,7 +884,7 @@ function displayColumns(board) {
     column.cards.forEach(function (card, cardIndex) {
       var cardElement = document.createElement('div');
       cardElement.classList.add('card');
-      cardElement.id = `card-${board.title}-${columnIndex}-${cardIndex}`; // 고유 ID 추가
+      cardElement.id = `card-${board.boardId}-${columnIndex}-${cardIndex}`; // 고유 ID 추가
 
       // 카드 제목 출력
       var cardTitleSpan = document.createElement('span');
@@ -1216,22 +1350,22 @@ function initializeSortable() {
 //
 //
 
-function execSearch() {
-  /**
-   * 검색어 input id: query
-   * 검색결과 목록: #search-result-box
-   * 검색결과 HTML 만드는 함수: addHTML
-   */
-      // 1. 검색창의 입력값을 가져온다.
-  let query = $('#query').val();
-
-  // 2. 검색창 입력값을 검사하고, 입력하지 않았을 경우 focus.
-  if (query == '') {
-    alert('검색어를 입력해주세요');
-    $('#query').focus();
-    return;
-  }
-  // // 3. GET /api/search?query=${query} 요청
+// function execSearch() {
+//   /**
+//    * 검색어 input id: query
+//    * 검색결과 목록: #search-result-box
+//    * 검색결과 HTML 만드는 함수: addHTML
+//    */
+//       // 1. 검색창의 입력값을 가져온다.
+//   let query = $('#query').val();
+//
+//   // 2. 검색창 입력값을 검사하고, 입력하지 않았을 경우 focus.
+//   if (query == '') {
+//     alert('검색어를 입력해주세요');
+//     $('#query').focus();
+//     return;
+//   }
+  // 3. GET /api/search?query=${query} 요청
   // $.ajax({
   //     type: 'GET',
   //     url: `/api/search?query=${query}`,
@@ -1249,4 +1383,4 @@ function execSearch() {
   //     }
   // })
 
-}
+// }

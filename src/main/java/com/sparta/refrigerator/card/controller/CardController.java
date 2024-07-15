@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -148,17 +149,17 @@ public class CardController {
     /**
      * 작업자별 카드 조회
      *
-     * @param requestDto : 조회할 작업자 이름 (collaborator)
+     * @param  : 조회할 작업자 이름 (collaborator)
      * @param boardId : 작업자별 카드를 조회할 보드 Id
      * @return : 선택한 보드내에서 조회된 작업자별 카드 정보
      */
 
-    @GetMapping("/boards/{boardId}/cards/Assignee")
+    @GetMapping("/boards/{boardId}/cards/assignee")
     public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getAssigneeCard(
-        @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CardCollaboratorRequestDto requestDto,
-        @PathVariable Long boardId) {
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
+        @PathVariable Long boardId, @RequestParam String collaborator) {
         List<CardResponseDto> responseDtoList = cardService.getAssigneeCard(
-            requestDto.getCollaborator(), boardId, userDetails.getUser());
+            collaborator, boardId, userDetails.getUser());
         DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
             "카드 작업자별 조회에 성공하였습니다.", responseDtoList);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -168,16 +169,16 @@ public class CardController {
      * 카드 상태별 조회
      *
      * @param boardId : 상태별 조회할 보드 Id
-     * @param requestDto : 조회할 상태 이름(columnName)
+     * @param columnName : 조회할 상태 이름(columnName)
      * @return : 선택한 보드내에서 조회된 상태별 카드 정보
      */
 
     @GetMapping("/boards/{boardId}/cards/status")
     public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getColumnNameCard(
         @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long boardId,
-        @RequestBody CardStatusRequestDto requestDto) {
+        @RequestParam String columnName) {
         List<CardResponseDto> responseDtoList = cardService.getColumnNameCard(boardId,
-            requestDto.getColumnName(), userDetails.getUser());
+            columnName, userDetails.getUser());
         DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
             "카드 상태별 조회에 성공하였습니다.", responseDtoList);
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -5,8 +5,8 @@ body, html {
     font-family: Arial, sans-serif;
     height: 100%;
   }
-  
-  
+
+
   .nav {
     width: 100%;
     margin: 30px auto;
@@ -15,16 +15,16 @@ body, html {
     align-items: center;
     justify-content: space-around;
   }
-  
-  
+
+
   .nav div {
     cursor: pointer;
   }
-  
+
   .nav div.active {
     font-weight: 700;
   }
-  
+
   .container {
     display: flex;
     flex-direction: row;
@@ -37,7 +37,7 @@ body, html {
     flex-direction: row;
   }
 
-  
+
   /* 사이드바 스타일 */
   .sidebar {
     width: 250px;
@@ -46,13 +46,16 @@ body, html {
     overflow-y: auto;
     height: 100vh;
   }
-  
+
   .sidebar .header {
     padding: 10px;
     background-color: #f0f0f0;
     border-bottom: 1px solid #ccc;
   }
-  
+
+
+
+
   /* 버튼 공통 스타일 */
   .header-button {
     padding: 10px 20px;
@@ -67,57 +70,59 @@ body, html {
     border-radius: 4px;
     text-decoration: none;
   }
-  
+
+
+
   /* 로그아웃 버튼 스타일 */
   #logout-button {
     background-color: #f44336; /* 빨간색 배경 */
   }
-  
+
   #logout-button:hover {
     background-color: #d32f2f; /* 어두운 빨간색 배경 */
   }
-  
+
   /* 보드 생성 버튼 스타일 */
   #board-create-button {
     background-color: #007bff; /* 파란색 배경 */
   }
-  
+
   #board-create-button:hover {
     background-color: #0056b3; /* 어두운 파란색 배경 */
   }
-  
-  
+
+
   #board-list {
     padding: 10px;
   }
-  
+
   .board-item {
     padding: 10px;
     cursor: pointer;
     border-bottom: 1px solid #ddd;
   }
-  
+
   .board-item:hover {
     background-color: #f9f9f9;
   }
-  
+
   /* 칸반 보드 스타일 */
   #kanban-board {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
   }
-  
+
   .board-content {
     margin-bottom: 20px;
   }
-  
+
   .columns {
     display: flex;
     overflow-x: auto;
     padding-bottom: 10px;
   }
-  
+
   .column {
     flex: 0 0 auto;
     width: 250px;
@@ -129,19 +134,19 @@ body, html {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     margin-bottom: 10px; /* 컬럼 간 간격 추가 */
   }
-  
+
   .column h3 {
     margin-top: 0;
     font-size: 18px;
     border-bottom: 1px solid #ccc;
     padding-bottom: 5px;
   }
-  
+
   /* 드래그 중인 컬럼의 스타일 */
   .sortable-ghost {
     opacity: 0.4;
   }
-  
+
   .column .add-card-button {
     background-color: #007bff;
     color: white;
@@ -153,11 +158,11 @@ body, html {
     margin-bottom: 10px; /* 버튼과 카드 간 간격 추가 */
     display: block; /* 버튼을 블록 요소로 설정하여 컬럼 안에서 한 줄에 표시되도록 함 */
   }
-  
+
   .column .add-card-button:hover {
     background-color: #0056b3;
   }
-  
+
   .column .card {
     background-color: #f9f9f9;
     margin-bottom: 10px;
@@ -166,17 +171,17 @@ body, html {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  
+
   .column .card h3 {
     margin-top: 0;
     font-size: 16px;
     margin-bottom: 5px;
   }
-  
+
   .column .card p {
     margin: 0;
   }
-  
+
   .modal {
     display: none;
     position: fixed;
@@ -188,7 +193,7 @@ body, html {
     overflow: auto;
     background-color: rgba(0,0,0,0.4);
   }
-  
+
   .modal-content {
     background-color: #fefefe;
     margin: 15% auto;
@@ -199,7 +204,7 @@ body, html {
     border-radius: 5px;
     position: relative;
   }
-  
+
   .modal-content input[type="text"],
   .modal-content textarea,
   .modal-content input[type="date"] {
@@ -210,7 +215,7 @@ body, html {
     border-radius: 5px;
     font-size: 14px;
   }
-  
+
   .modal-content button {
     background-color: #007bff;
     color: white;
@@ -220,11 +225,11 @@ body, html {
     border-radius: 5px;
     font-size: 14px;
   }
-  
+
   .modal-content button:hover {
     background-color: #0056b3;
   }
-  
+
   /* 모달 스타일 추가 */
   #board-delete-modal .modal-content {
     text-align: center;
@@ -267,11 +272,11 @@ input#query::placeholder {
 #explore-section > div {
     margin-bottom: 10px;
 }
-  
+
 #toggle-search-options {
     margin-bottom: 10px;
 }
-  
+
 #toggle-search-options label {
     margin-right: 15px;
 }
