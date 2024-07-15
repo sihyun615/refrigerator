@@ -692,27 +692,25 @@ function createCard() {
         return;
     }
     var modal = document.getElementById('card-creation-modal');
-    console.log(modal.dataset);
-    console.log(modal.dataset.boardId);
     var boardId = modal.dataset.boardId;
     var columnId = modal.dataset.columnId;
-    console.log(modal.dataset.columnId);
     var cardTitle = document.getElementById('card-title').value;
     var cardContent = document.getElementById('card-content').value;
     var cardAssignee = document.getElementById('card-assignee').value;
     var cardDueDate = document.getElementById('card-due-date').value;
-    console.log(cardDueDate);
-    console.log(typeof cardDueDate);
+
     var card = {
         title: cardTitle,
         content: cardContent,
         collaborator: cardAssignee,
         deadline: cardDueDate
     };
+
     if (cardTitle.trim() === '') {
         alert('카드 제목을 입력해주세요.');
         return;
     }
+
     $.ajax({
         url: `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards`,
         type: 'POST',
@@ -722,20 +720,14 @@ function createCard() {
             xhr.setRequestHeader('Authorization', auth);
         },
         success: function (data) {
-            console.log(data.data);
-            console.log(data.data.cardId);
             var cardId = data.data.id;
-            // 보드 찾기
             var board = boards.find(b => b.boardId === parseInt(boardId, 10));
             if (board) {
-                var column = board.columns.find(
-                    c => c.columnId === parseInt(columnId, 10));
+                var column = board.columns.find(c => c.columnId === parseInt(columnId, 10));
                 if (column) {
-                    // 컬럼에 cards 배열이 없으면 생성
                     if (!column.cards) {
                         column.cards = [];
                     }
-                    // 새 카드 객체 생성
                     var newCard = {
                         cardId: cardId,
                         title: cardTitle,
@@ -743,27 +735,34 @@ function createCard() {
                         collaborator: cardAssignee,
                         deadline: cardDueDate
                     };
-                    // 카드 배열에 새 카드 추가
                     column.cards.push(newCard);
                 }
-                // 모달 닫기
                 hideCardCreationModal();
-                // 보드 다시 표시
                 displayBoard(board);
 
                 document.getElementById('card-title').value = '';
                 document.getElementById('card-content').value = '';
                 document.getElementById('card-assignee').value = '';
                 document.getElementById('card-due-date').value = '';
-
-                console.log(cardId);
             }
         },
-        error: function () {
-            alert('카드 생성에 실패했습니다. 다시 시도해주세요.');
+        error: function (xhr, status, error) {
+            if (xhr.status === 404) {
+                var errorMessage = '보드에 초대된 사용자가 아닙니다.';
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response && response.message) {
+                        errorMessage = response.message;
+                    }
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                }
+                alert(errorMessage);
+            } else {
+                alert('카드 생성에 실패했습니다. 다시 시도해주세요.');
+            }
         }
     });
-
 }
 
 // 카드 수정 모달 열기 함수
