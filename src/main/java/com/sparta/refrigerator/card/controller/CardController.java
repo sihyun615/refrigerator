@@ -192,4 +192,14 @@ public class CardController {
         StatusCommonResponse response = new StatusCommonResponse(200, "카드가 이동되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @GetMapping("/boards/{boardId}/columns/{columnId}/cards")
+    public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getColumnCard(
+        @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long boardId,
+        @PathVariable Long columnId) {
+        List<CardResponseDto> responseDtoList = cardService.getColumnCard(boardId,
+            columnId, userDetails.getUser());
+        DataCommonResponse<List<CardResponseDto>> response = new DataCommonResponse<>(200,
+            "카드 컬럼별 조회에 성공하였습니다.", responseDtoList);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

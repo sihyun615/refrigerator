@@ -276,4 +276,22 @@ public class CardService {
             () -> new DataNotFoundException("해당 카드는 삭제되었거나 존재하지 않습니다.")
         );
     }
+
+    @Transactional(readOnly = true)
+    public List<CardResponseDto> getColumnCard(Long boardId, Long columnId, User user) {
+        Board checkBoard = boardService.findById(boardId);
+        Columns checkColumn = columnService.findById(columnId);
+        userService.findById(user.getId());
+
+        if (checkBoard == null) {
+            throw new DataNotFoundException("보드가 존재하지 않습니다");
+        }
+
+        List<Card> cards = cardRepository.findByColumns(checkColumn);
+
+        return cards
+            .stream()
+            .map(CardResponseDto::new)
+            .collect(Collectors.toList());
+    }
 }
