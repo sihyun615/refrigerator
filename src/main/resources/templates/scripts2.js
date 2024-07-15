@@ -1003,7 +1003,6 @@ function hideCardEditModal() {
 
 // 저장된 컬럼들 표시
 function displayColumns(board) {
-    console.log("Displaying columns for board:", board);
     var columnsContainer = document.getElementById(`columns-${board.boardName}`);
     columnsContainer.innerHTML = '';
     columnsContainer.classList.add('columns');
@@ -1011,9 +1010,13 @@ function displayColumns(board) {
         var columnElement = document.createElement('div');
         columnElement.classList.add('column');
         columnElement.id = `column-${board.boardName}-${columnIndex}`;
+
+        // 컬럼 제목 출력
         var columnNameSpan = document.createElement('span');
         columnNameSpan.textContent = column.columnName;
         columnElement.appendChild(columnNameSpan);
+
+        // 삭제 버튼 추가 (컬럼 삭제)
         var deleteColumnButton = document.createElement('button');
         deleteColumnButton.textContent = '컬럼삭제';
         deleteColumnButton.classList.add('delete-column-button');
@@ -1021,32 +1024,43 @@ function displayColumns(board) {
             confirmDeleteColumn(column.columnId, board.boardId, columnIndex, event);
         };
         columnElement.appendChild(deleteColumnButton);
+
+        // 카드 추가 버튼
         var addCardButton = document.createElement('button');
         addCardButton.textContent = '카드 추가';
         addCardButton.onclick = function() {
             showCardCreationModal(column.columnId, board.boardId);
         };
         columnElement.appendChild(addCardButton);
+
+        // 카드 컨테이너
         var cardsContainer = document.createElement('div');
         cardsContainer.classList.add('cards');
         if (column.cards && column.cards.length > 0) {
             column.cards.forEach(function (card, cardIndex) {
+                console.log(card);
                 var cardElement = document.createElement('div');
                 cardElement.classList.add('card');
                 cardElement.id = `card-${board.boardId}-${columnIndex}-${cardIndex}`;
+
+                // 카드 제목 출력
                 var cardTitleSpan = document.createElement('span');
                 cardTitleSpan.textContent = card.title;
                 cardTitleSpan.onclick = function () {
                     showCardDetailsModal(card);
                 };
                 cardElement.appendChild(cardTitleSpan);
+
+                // 수정 버튼 추가 (카드 수정)
                 var editCardButton = document.createElement('button');
                 editCardButton.textContent = '카드수정';
                 editCardButton.classList.add('edit-card-button');
                 editCardButton.onclick = function () {
-                    showCardEditModal(board.boardId, columnIndex, cardIndex, card.cardId, card.title, card.content, card.collaborator, card.deadline);
+                    showCardEditModal(board.boardId, columnIndex, cardIndex, card.id, card.title, card.content, card.collaborator, card.deadline);
                 };
                 cardElement.appendChild(editCardButton);
+
+                // 삭제 버튼 추가 (카드 삭제)
                 var deleteCardButton = document.createElement('button');
                 deleteCardButton.textContent = '카드삭제';
                 deleteCardButton.classList.add('delete-card-button');
@@ -1090,7 +1104,7 @@ function addComment() {
         if (card) {
             var boardId = board.boardId;
             var columnId = column.columnId;
-            var cardId = card.cardId;
+            var cardId = card.id;
 
             var comment = {
                 content: commentInput
@@ -1220,8 +1234,8 @@ function showCardDetailsModal(card) {
     // 모달 내용 설정
     document.getElementById('card-details-title').textContent = card.title;
     document.getElementById('card-details-content').textContent = card.content;
-    document.getElementById('card-details-assignee').textContent = card.assignee;
-    document.getElementById('card-details-due-date').textContent = card.dueDate;
+    document.getElementById('card-details-assignee').textContent = card.collaborator;
+    document.getElementById('card-details-due-date').textContent = card.deadline;
 
     // 댓글 표시
     displayComments(modal, card.comments || [], card);
@@ -1274,7 +1288,7 @@ function deleteCard(boardId, columnIndex, cardIndex) {
     // 보드 찾기
     var board = boards.find(b => b.boardId === parseInt(boardId, 10));
     var columnId = board.columns[columnIndex].columnId;
-    var cardId = board.columns[columnIndex].cards[cardIndex].cardId;
+    var cardId = board.columns[columnIndex].cards[cardIndex].id;
 
     if (board && columnIndex !== undefined && cardIndex !== undefined) {
         // AJAX 요청 보내기
@@ -1380,7 +1394,7 @@ function initializeSortableCardContainer(column) {
                 var newColumnId = board.columns[newColumnIndex].columnId;
                 const movedCard = board.columns[oldColumnIndex].cards.splice(oldIndex,
                     1)[0];
-                var cardId = movedCard.cardId;
+                var cardId = movedCard.id;
                 board.columns[newColumnIndex].cards.splice(newIndex, 0, movedCard);
 
                 // 백엔드로 카드 이동 요청 보내기
