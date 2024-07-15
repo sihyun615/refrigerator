@@ -222,28 +222,24 @@ public class CardService {
     @Transactional
     public void moveCard(Long boardId, Long columnId, Long cardId, CardMoveRequestDto requestDto, User user) {
         Board checkBoard = boardService.findById(boardId);
-        Columns checkColumns = columnService.findById(columnId);
+        Columns currentColumn = columnService.findById(columnId);
+        Columns targetColumn = columnService.findById(requestDto.getColumnId());
         userService.findById(user.getId());
 
-        // 요청으로부터 이동할 컬럼의 ID와 목표 인덱스를 가져옴
-        Long targetColumnId = requestDto.getColumnId();
+        // 요청으로부터 이동할 카드의 목표 인덱스 가져옴
         Long targetCardIndex = requestDto.getCardIndex();
 
-        // 현재 컬럼과 목표 컬럼이 같으면 아무 작업도 하지 않음
-        if (checkColumns.getId().equals(targetColumnId)) {
-            return;
-        }
+//        Card targetCard = (Card) cardRepository.findByColumns(currentColumn);
 
-        // 모든 컬럼을 현재 보드에서 조회
-        List<Columns> columnsList = columnRepository.findAllByBoardOrderByColumnIndex(checkBoard);
 
-        // 이동할 컬럼과 목표 컬럼을 찾기
-        Columns targetColumn = columnService.findById(targetColumnId);
 
-        // 컬럼이 null인 경우 예외 처리
-        if (targetColumn == null) {
-            throw new DataNotFoundException("이동할 컬럼을 찾을 수 없습니다.");
-        }
+        // 이동할 카드찾기
+        Card cardToMove = cardRepository.findById(cardId)
+            .orElseThrow(() -> new DataNotFoundException("이동할 카드를 찾을 수 없습니다."));
+
+        // 현재 컬럼의 카드 목록 갱신
+        List<Card> currentCardList = cardRepository.findByColumns(currentColumn);
+        currentCardList.remove(cardToMove);
 
         // 목표 인덱스 범위 확인
         List<Card> targetCardList = cardRepository.findByColumns(targetColumn);
@@ -251,22 +247,14 @@ public class CardService {
             throw new BadRequestException("목표 인덱스가 범위를 벗어납니다.");
         }
 
-        // 이동할 카드 찾기
-        Card cardToMove = findCard(cardId);
-        if (cardToMove == null) {
-            throw new DataNotFoundException("이동할 카드를 찾을 수 없습니다.");
-        }
-
-        // 현재 컬럼의 카드 목록 갱신
-        List<Card> currentCardList = cardRepository.findByColumns(cardToMove.getColumns());
-        currentCardList.remove(cardToMove);
-
         // 이동할 카드의 컬럼과 인덱스 업데이트
         cardToMove.updateColumns(targetColumn);
-        cardToMove.updateCardIndex(targetCardIndex);
-
-        // 목표 컬럼의 카드 목록 갱신
         targetCardList.add(Math.toIntExact(targetCardIndex), cardToMove);
+
+//        // 현재 컬럼과 목표 컬럼이 같고, 옮기려는 카드 인덱스와 목표 카드인덱스가 같으면 아무 작업도 하지 않음
+//        if (currentColumn.getId().equals(targetColumn.getId()) && currentColumn.getCardList().get().getCardIndex() == targetCardIndex) {
+//            return;
+//        }
 
         // 변경된 순서대로 모든 카드를 저장
         for (int i = 0; i < currentCardList.size(); i++) {
