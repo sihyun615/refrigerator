@@ -1,11 +1,8 @@
 package com.sparta.refrigerator.card.repository;
 
-import com.sparta.refrigerator.auth.entity.User;
-import com.sparta.refrigerator.board.entity.Board;
 import com.sparta.refrigerator.card.entity.Card;
 import com.sparta.refrigerator.column.entity.Columns;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

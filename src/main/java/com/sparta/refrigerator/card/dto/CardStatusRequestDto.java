@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class CardStatusRequestDto {
+
     private String columnName;
 
 }

@@ -10,15 +10,13 @@ import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.card.dto.CardResponseDto;
 import com.sparta.refrigerator.card.entity.Card;
 import com.sparta.refrigerator.card.repository.CardRepository;
-import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.column.repository.ColumnRepository;
 import com.sparta.refrigerator.column.service.ColumnService;
-import com.sparta.refrigerator.exception.BadRequestException;
-import com.sparta.refrigerator.exception.CardNotFoundException;
-import com.sparta.refrigerator.exception.DataNotFoundException;
-import com.sparta.refrigerator.exception.ForbiddenException;
-import com.sparta.refrigerator.exception.UserMisMatchException;
+import com.sparta.refrigerator.common.exception.BadRequestException;
+import com.sparta.refrigerator.common.exception.CardNotFoundException;
+import com.sparta.refrigerator.common.exception.DataNotFoundException;
+import com.sparta.refrigerator.common.exception.UserMisMatchException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +44,7 @@ public class CardService {
         Columns checkColumn = columnService.findById(columnId);
         Board checkBoard = boardService.findById(boardId);
 
-        if(checkBoard == null) {
+        if (checkBoard == null) {
             throw new DataNotFoundException("보드가 존재하지 않습니다");
         }
 
@@ -220,7 +218,8 @@ public class CardService {
     }
 
     @Transactional
-    public void moveCard(Long boardId, Long columnId, Long cardId, CardMoveRequestDto requestDto, User user) {
+    public void moveCard(Long boardId, Long columnId, Long cardId, CardMoveRequestDto requestDto,
+        User user) {
         Board checkBoard = boardService.findById(boardId);
         Columns currentColumn = columnService.findById(columnId);
         Columns targetColumn = columnService.findById(requestDto.getColumnId());
@@ -230,8 +229,6 @@ public class CardService {
         Long targetCardIndex = requestDto.getCardIndex();
 
 //        Card targetCard = (Card) cardRepository.findByColumns(currentColumn);
-
-
 
         // 이동할 카드찾기
         Card cardToMove = cardRepository.findById(cardId)

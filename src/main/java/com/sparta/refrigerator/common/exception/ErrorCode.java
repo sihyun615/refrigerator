@@ -1,4 +1,4 @@
-package com.sparta.refrigerator.exception;
+package com.sparta.refrigerator.common.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

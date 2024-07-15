@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class DataCommonResponse<T> {
+
     private Integer httpStatusCode;
     private String message;
     private T data;

@@ -1,10 +1,10 @@
 package com.sparta.refrigerator.card.entity;
 
-//import com.sparta.refrigerator.comment.entity.Comment;
 import com.sparta.refrigerator.auth.entity.User;
 import com.sparta.refrigerator.board.entity.Board;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.column.entity.Columns;
+import com.sparta.refrigerator.comment.entity.Comment;
 import com.sparta.refrigerator.common.TimeStamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,19 +17,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "card")
 public class Card extends TimeStamp {
 
@@ -64,8 +59,8 @@ public class Card extends TimeStamp {
     private Board board;
 
 
-//    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Comment> commentList = new ArrayList<>();
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> commentList = new ArrayList<>();
 
     public Card(CardRequestDto requestDto, Columns columns, User user, Board board, Long maxIndex) {
         this.title = requestDto.getTitle();
@@ -93,7 +88,6 @@ public class Card extends TimeStamp {
     public void updateColumns(Columns columns) {
         this.columns = columns;
     }
-
 
 
 }

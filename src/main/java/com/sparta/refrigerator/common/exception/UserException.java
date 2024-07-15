@@ -1,4 +1,4 @@
-package com.sparta.refrigerator.exception;
+package com.sparta.refrigerator.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -7,17 +7,17 @@ public class UserException extends RuntimeException {
 
     private ErrorCode errorCode;
 
-    public UserException(ErrorCode errorCode){
+    public UserException(ErrorCode errorCode) {
         super(errorCode.getMsg());
         this.errorCode = errorCode;
         log.info("ExceptionMethod: {}", getExceptionMethod());
         log.info("ErrorCode: {}", errorCode.getMsg());
     }
 
-    public String getExceptionMethod(){
+    public String getExceptionMethod() {
         String className = Thread.currentThread().getStackTrace()[3].getClassName();
         String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();
-        return className + "." +methodName;
+        return className + "." + methodName;
     }
 
 }
