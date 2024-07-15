@@ -145,13 +145,14 @@ function createBoard() {
             boards.push({...board, boardId});
             addBoardToSidebar({...board, boardId});
             hideBoardCreationModal();
+            window.location.reload()
             document.getElementById('board-title').value = '';
             document.getElementById('board-content').value = '';
             document.getElementById('board-error').textContent = '';
         },
         error: function () {
             document.getElementById(
-                'board-error').textContent = '보드 생성 중 오류가 발생했습니다.';
+                'board-error').textContent = '보드 생성시 권한이 필요합니다..';
         }
     });
 }
@@ -530,6 +531,8 @@ function inviteUser() {
                 alert('이미 해당 보드에 초대된 사용자입니다.');
             } else if (xhr.status === 404) {
                 alert('초대할 사용자가 없습니다.');
+            }else if (xhr.status === 403) {
+                alert('초대할 권한이 없습니다.');
             } else {
                 alert('초대 과정에서 오류가 발생했습니다.');
             }
