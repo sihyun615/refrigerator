@@ -184,7 +184,7 @@ function addBoardToSidebar(board) {
 function displayBoard(board) {
     var kanbanBoard = document.getElementById('kanban-board');
     kanbanBoard.innerHTML = `
-        <div class="board-content">
+        <div class="board-content" id="${board.boardId}">
             <h2>${board.boardName}</h2>
             <p>${board.boardInfo}</p>
             <div class="columns" id="columns-${board.boardName}">
@@ -989,9 +989,15 @@ function execSearchAll() {
 
 
 function getCurrentBoardId() {
-    console.log(document.getElementById('card-creation-modal').dataset);
-    // 현재 보드 ID를 가져오는 로직
-    return document.getElementById('card-creation-modal').dataset.boardId;
+
+    var boardContent = document.querySelector('.board-content');
+    // console.log(boardContent);
+    var boardId = boardContent.id;
+
+// 가져온 ID 값을 확인 (콘솔에 출력)
+    console.log(boardId);
+
+    return boardId;
 }
 
 
