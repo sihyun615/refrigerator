@@ -48,3 +48,10 @@
 ![트렐5api2](https://github.com/user-attachments/assets/af28982f-e0bb-4958-8748-a9bd212d4680)
 ![트렐5api3](https://github.com/user-attachments/assets/622cddd7-51e3-4b66-91ce-27a9ef1e722c)
 
+
+<br>
+
+
+# 🗃 노션
+
+[![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://teamsparta.notion.site/Trell5-65137dd88731469f8964816ec38eaaca)
