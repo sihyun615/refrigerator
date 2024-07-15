@@ -32,7 +32,8 @@ public class CommentService {
 
     public List<CommentResponseDto> getAllComments(Long cardId, int page, int pageSize) {
         Card card = cardService.findCard(cardId);
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, pageSize,
+            Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Comment> commentPage = commentRepository.findAllByCard(card, pageable);
         return commentPage.stream().map(CommentResponseDto::new).collect(Collectors.toList());
     }

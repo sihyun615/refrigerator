@@ -1,12 +1,8 @@
 package com.sparta.refrigerator.board.entity;
 
 import com.sparta.refrigerator.auth.entity.User;
-import com.sparta.refrigerator.auth.enumeration.UserAuth;
 import com.sparta.refrigerator.common.TimeStamp;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;

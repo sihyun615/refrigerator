@@ -1,17 +1,14 @@
 package com.sparta.refrigerator.card.controller;
 
 import com.sparta.refrigerator.auth.service.UserDetailsImpl;
-import com.sparta.refrigerator.card.dto.CardCollaboratorRequestDto;
 import com.sparta.refrigerator.card.dto.CardMoveRequestDto;
 import com.sparta.refrigerator.card.dto.CardRequestDto;
 import com.sparta.refrigerator.card.dto.CardResponseDto;
-import com.sparta.refrigerator.card.dto.CardStatusRequestDto;
 import com.sparta.refrigerator.card.service.CardService;
-import com.sparta.refrigerator.column.dto.ColumnMoveRequestDto;
 import com.sparta.refrigerator.column.service.ColumnService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
 import com.sparta.refrigerator.common.response.StatusCommonResponse;
-import com.sparta.refrigerator.exception.UnauthorizedException;
+import com.sparta.refrigerator.common.exception.UnauthorizedException;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +37,7 @@ public class CardController {
     /**
      * 키드 생성기능
      *
-     * @param boardId          : 카드를 등록 할 보드의 Id
+     * @param boardId    : 카드를 등록 할 보드의 Id
      * @param requestDto : 등록할 카드의 정보
      * @return : 등록된 카드 정보
      */
@@ -64,7 +61,7 @@ public class CardController {
     /**
      * 카드 수정기능
      *
-     * @param cardId          : 수정할 카드의 Id
+     * @param cardId     : 수정할 카드의 Id
      * @param requestDto : 수정될 카드의 정보
      * @return : 수정된 카드 정보
      */
@@ -100,7 +97,7 @@ public class CardController {
     /**
      * 카드 단건조회 기능
      *
-     * @param cardId          : 조회할 카드의 Id
+     * @param cardId : 조회할 카드의 Id
      * @return : 조회된 카드 정보
      */
 
@@ -108,7 +105,8 @@ public class CardController {
     public ResponseEntity<DataCommonResponse<CardResponseDto>> getCard(
         @PathVariable Long columnId, @PathVariable Long cardId, @PathVariable Long boardId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        CardResponseDto responseDto = cardService.getCard(cardId, userDetails.getUser(), columnId, boardId);
+        CardResponseDto responseDto = cardService.getCard(cardId, userDetails.getUser(), columnId,
+            boardId);
         DataCommonResponse<CardResponseDto> response = new DataCommonResponse<>(200,
             "카드 단건 조회에 성공하였습니다.", responseDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -149,7 +147,7 @@ public class CardController {
     /**
      * 작업자별 카드 조회
      *
-     * @param  : 조회할 작업자 이름 (collaborator)
+     * @param :       조회할 작업자 이름 (collaborator)
      * @param boardId : 작업자별 카드를 조회할 보드 Id
      * @return : 선택한 보드내에서 조회된 작업자별 카드 정보
      */
@@ -168,7 +166,7 @@ public class CardController {
     /**
      * 카드 상태별 조회
      *
-     * @param boardId : 상태별 조회할 보드 Id
+     * @param boardId    : 상태별 조회할 보드 Id
      * @param columnName : 조회할 상태 이름(columnName)
      * @return : 선택한 보드내에서 조회된 상태별 카드 정보
      */
@@ -186,12 +184,14 @@ public class CardController {
 
     @PutMapping("/boards/{boardId}/columns/{columnId}/cards/{cardId}/transfer")
     public ResponseEntity<StatusCommonResponse> moveCard(@PathVariable Long boardId,
-        @PathVariable Long columnId, @PathVariable Long cardId, @RequestBody CardMoveRequestDto requestDto,
+        @PathVariable Long columnId, @PathVariable Long cardId,
+        @RequestBody CardMoveRequestDto requestDto,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         cardService.moveCard(boardId, columnId, cardId, requestDto, userDetails.getUser());
         StatusCommonResponse response = new StatusCommonResponse(200, "카드가 이동되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
     @GetMapping("/boards/{boardId}/columns/{columnId}/cards")
     public ResponseEntity<DataCommonResponse<List<CardResponseDto>>> getColumnCard(
         @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long boardId,

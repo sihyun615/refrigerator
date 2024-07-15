@@ -1,6 +1,7 @@
-package com.sparta.refrigerator.exception;
+package com.sparta.refrigerator.common.exception;
 
 public class DataNotFoundException extends RuntimeException {
+
     public DataNotFoundException(String message) {
         super(message);
     }

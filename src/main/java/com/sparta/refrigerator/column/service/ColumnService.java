@@ -10,17 +10,16 @@ import com.sparta.refrigerator.column.dto.ColumnRequestDto;
 import com.sparta.refrigerator.column.dto.ColumnResponseDto;
 import com.sparta.refrigerator.column.entity.Columns;
 import com.sparta.refrigerator.column.repository.ColumnRepository;
-import com.sparta.refrigerator.exception.BadRequestException;
-import com.sparta.refrigerator.exception.ConflictException;
-import com.sparta.refrigerator.exception.DataNotFoundException;
-import com.sparta.refrigerator.exception.ForbiddenException;
+import com.sparta.refrigerator.common.exception.BadRequestException;
+import com.sparta.refrigerator.common.exception.ConflictException;
+import com.sparta.refrigerator.common.exception.DataNotFoundException;
+import com.sparta.refrigerator.common.exception.ForbiddenException;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -85,13 +84,15 @@ public class ColumnService {
     }
 
     @Transactional
-    public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto, User user) {
+    public void moveColumn(Long boardId, Long columnId, ColumnMoveRequestDto requestDto,
+        User user) {
         Board checkBoard = boardService.findById(boardId);
         Columns checkColumns = findById(columnId);
         User checkUser = userService.findById(user.getId());
 
         // 디버깅 로그 추가
-        log.info("moveColumn called with boardId: {}, columnId: {}, targetIndex: {}", boardId, columnId, requestDto.getColumnIndex());
+        log.info("moveColumn called with boardId: {}, columnId: {}, targetIndex: {}", boardId,
+            columnId, requestDto.getColumnIndex());
 
         // 해당 컬럼을 생성한 ADMIN만이 이동/수정 가능
         if (!checkColumns.getUser().getId().equals(checkUser.getId())) {

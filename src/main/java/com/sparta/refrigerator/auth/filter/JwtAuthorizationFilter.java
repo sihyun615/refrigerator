@@ -1,7 +1,7 @@
 package com.sparta.refrigerator.auth.filter;
 
 import com.sparta.refrigerator.auth.jwt.JwtUtil;
-import com.sparta.refrigerator.exception.TokenExpiredException;
+import com.sparta.refrigerator.common.exception.TokenExpiredException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

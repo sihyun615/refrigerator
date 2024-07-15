@@ -5,7 +5,7 @@ import com.sparta.refrigerator.comment.dto.CommentRequestDto;
 import com.sparta.refrigerator.comment.dto.CommentResponseDto;
 import com.sparta.refrigerator.comment.service.CommentService;
 import com.sparta.refrigerator.common.response.DataCommonResponse;
-import com.sparta.refrigerator.exception.UnauthorizedException;
+import com.sparta.refrigerator.common.exception.UnauthorizedException;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class CommentController {
     /**
      * 댓글 등록 기능
      *
-     * @param cardId          : 댓글 등록 할 카드의 Id
+     * @param cardId            : 댓글 등록 할 카드의 Id
      * @param commentRequestDto : 등록할 댓글 정보
      * @return : 등록된 댓글 정보
      */
