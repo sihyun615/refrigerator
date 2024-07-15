@@ -10,10 +10,6 @@ import com.sparta.refrigerator.comment.repository.CommentRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,13 +26,10 @@ public class CommentService {
         return new CommentResponseDto(comment);
     }
 
-    public List<CommentResponseDto> getAllComments(Long cardId, int page, int pageSize) {
+    public List<CommentResponseDto> getAllComments(Long cardId) {
         Card card = cardService.findCard(cardId);
-        Pageable pageable = PageRequest.of(page, pageSize,
-            Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> commentPage = commentRepository.findAllByCard(card, pageable);
-        return commentPage.stream().map(CommentResponseDto::new).collect(Collectors.toList());
+        List<Comment> comment = commentRepository.findAllByCardOrderByCreatedAtDesc(card);
+        return comment.stream().map(CommentResponseDto::new).collect(Collectors.toList());
     }
-
 
 }
