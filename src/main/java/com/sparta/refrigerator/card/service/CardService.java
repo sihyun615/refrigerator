@@ -206,7 +206,7 @@ public class CardService {
             throw new DataNotFoundException("보드가 존재하지 않습니다");
         }
 
-        Columns columns = columnRepository.findByColumnName(columnName)
+        Columns columns = columnRepository.findByColumnNameAndBoard(columnName,checkBoard)
             .orElseThrow(() -> new IllegalArgumentException("컬럼이 없습니다"));
 
         List<Card> cards = cardRepository.findByColumns(columns);
