@@ -647,6 +647,11 @@ function createCard() {
         // 보드 다시 표시
         displayBoard(board);
 
+        document.getElementById('card-title').value = '';
+        document.getElementById('card-content').value = '';
+        document.getElementById('card-assignee').value = '';
+        document.getElementById('card-due-date').value = '';
+
         console.log(cardId);
       }
     },
@@ -658,13 +663,7 @@ function createCard() {
 }
 
 // 카드 수정 모달 열기 함수
-function showCardEditModal(boardTitle, columnIndex, cardIndex, cardTitle,
-    cardContent, cardAssignee, cardDueDate) {
-  // 기존에 열려 있는 모든 모달 닫기
-  document.querySelectorAll('.modal').forEach(function (modal) {
-    modal.style.display = 'none';
-  });
-
+function showCardEditModal(boardId, columnIndex, cardIndex, cardId, cardTitle, cardContent, cardAssignee, cardDueDate) {
   var modal = document.getElementById('edit-card-modal');
   var editCardTitleInput = document.getElementById('edit-card-title');
   var editCardContentTextarea = document.getElementById('edit-card-content');
@@ -678,32 +677,90 @@ function showCardEditModal(boardTitle, columnIndex, cardIndex, cardTitle,
 
   var saveEditCardButton = document.getElementById('save-edit-card-button');
   saveEditCardButton.onclick = function () {
-    saveCardEdit(boardTitle, columnIndex, cardIndex);
-    hideCardEditModal();
+    saveCardEdit(boardId, columnIndex, cardIndex, cardId);
   };
+
+  modal.dataset.boardId = boardId;
+  modal.dataset.columnIndex = columnIndex;
+  modal.dataset.cardIndex = cardIndex;
+  modal.dataset.cardId = cardId;
 
   modal.style.display = 'block';
 }
 
 // 카드 수정 저장 함수
-function saveCardEdit(boardTitle, columnIndex, cardIndex) {
+function saveCardEdit(boardId, columnIndex, cardIndex, cardId) {
+  const auth = getToken();
+  if (!auth) {
+    alert('인증 토큰이 없습니다. 다시 로그인해주세요.');
+    return;
+  }
+
   var editedTitle = document.getElementById('edit-card-title').value;
   var editedContent = document.getElementById('edit-card-content').value;
   var editedAssignee = document.getElementById('edit-card-assignee').value;
   var editedDueDate = document.getElementById('edit-card-due-date').value;
 
-  // 실제로 데이터를 업데이트하고 화면을 다시 그리는 작업이 필요합니다.
-  var board = boards.find(b => b.title === boardTitle);
-  if (board) {
-    var cardToUpdate = board.columns[columnIndex].cards[cardIndex];
-    cardToUpdate.title = editedTitle;
-    cardToUpdate.content = editedContent;
-    cardToUpdate.assignee = editedAssignee;
-    cardToUpdate.dueDate = editedDueDate;
-
-    // 화면 다시 그리기
-    displayColumns(board);
+  var board = boards.find(b => b.boardId === parseInt(boardId, 10));
+  if (!board || !board.columns) {
+    console.error('Board or columns not found');
+    alert('보드 정보를 찾을 수 없습니다.');
+    return;
   }
+
+  var column = board.columns[columnIndex];
+  if (!column || !column.cards) {
+    console.error('Column or cards not found');
+    alert('컬럼 정보를 찾을 수 없습니다.');
+    return;
+  }
+
+  var card = column.cards[cardIndex];
+  if (!card) {
+    console.error('Card not found');
+    alert('카드 정보를 찾을 수 없습니다.');
+    return;
+  }
+
+  var updatedCard = {
+    title: editedTitle,
+    content: editedContent,
+    collaborator: editedAssignee,
+    deadline: editedDueDate
+  };
+
+  $.ajax({
+    url: `http://localhost:8080/boards/${boardId}/columns/${column.columnId}/cards/${cardId}`,
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify(updatedCard),
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('Authorization', auth);
+    },
+    success: function(response) {
+      console.log('Card updated successfully:', response);
+
+      // 로컬 데이터 업데이트
+      card.title = editedTitle;
+      card.content = editedContent;
+      card.collaborator = editedAssignee;
+      card.deadline = editedDueDate;
+
+      // 보드 다시 표시
+      displayBoard(board);
+
+      // 모달 닫기
+      hideCardEditModal();
+    },
+    error: function(xhr, status, error) {
+      console.error('Error updating card:', error);
+      if (xhr.status === 403) {
+        alert('권한이 없습니다. 관리자에게 문의하세요.');
+      } else {
+        alert('카드 수정에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
+  });
 }
 
 
@@ -899,8 +956,7 @@ function displayColumns(board) {
       editCardButton.textContent = '카드수정';
       editCardButton.classList.add('edit-card-button');
       editCardButton.onclick = function () {
-        showCardEditModal(board.title, columnIndex, cardIndex, card.title,
-            card.content, card.assignee, card.dueDate);
+        showCardEditModal(board.boardId, columnIndex, cardIndex, card.cardId, card.title, card.content, card.collaborator, card.deadline);
       };
       cardElement.appendChild(editCardButton);
 
