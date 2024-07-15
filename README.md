@@ -9,7 +9,7 @@
 | 박시현 | 박민혁 | 신성훈 | 홍서영 | 이세원 |
 |:------:|:------:|:------:|:------:|:------:|
 | [![박시현](https://github.com/sihyun615.png)](https://github.com/sihyun615) | [![박민혁](https://github.com/hanraeul.png)](https://github.com/hanraeul) | [![신성훈](https://github.com/seonghoon90.png)](https://github.com/seonghoon90) | [![홍서영](https://github.com/hongsy521.png)](https://github.com/hongsy521) | [![이세원](https://github.com/leesw1945.png)](https://github.com/leesw1945) |
-| <span style="font-size: 0.5em;">• 프로젝트 전체 관리<br>• 팀원 서포트<br>• 댓글 구현<br>• 프론트엔드 연결</span> | <span style="font-size: 0.5em;">• 카드 CRUD<br>• 프론트엔드 연결</span> | <span style="font-size: 0.5em;">• 보드 CRUD<br>• 프론트엔드 구현<br>• 프론트엔드 연결</span> | <span style="font-size: 0.5em;">• 컬럼 CRUD<br>• 프론트엔드 연결</span> | <span style="font-size: 0.5em;">• 회원가입<br>• 로그인<br>• 프론트엔드 연결</span> |
+| <span style="font-size: 0.5em;">• 프로젝트 전체 관리<br>• 팀원 서포트<br>• 댓글 구현<br>• 프론트엔드 연결<br>• 쿼리최적화</span> | <span style="font-size: 0.5em;">• 카드 CRUD<br>• 프론트엔드 연결<br>• 쿼리최적화</span> | <span style="font-size: 0.5em;">• 보드 CRUD<br>• 프론트엔드 구현<br>• 프론트엔드 연결<br>• 쿼리최적화</span> | <span style="font-size: 0.5em;">• 컬럼 CRUD<br>• 프론트엔드 연결<br>• 쿼리최적화</span> | <span style="font-size: 0.5em;">• 회원가입<br>• 로그인<br>• 프론트엔드 연결<br>• 쿼리최적화</span> |
 
 
 <br>
