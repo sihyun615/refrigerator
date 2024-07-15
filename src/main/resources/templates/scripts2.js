@@ -858,7 +858,11 @@ function saveCardEdit(boardId, columnIndex, cardIndex, cardId) {
         error: function(xhr, status, error) {
             console.error('Error updating card:', error);
             if (xhr.status === 403) {
-                alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+                if (error === '보드에 초대된 사용자가 아닙니다') {
+                    alert('보드에 초대된 사용자가 아닙니다.');
+                } else {
+                    alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+                }
             } else {
                 alert('카드 수정에 실패했습니다. 다시 시도해주세요.');
             }
