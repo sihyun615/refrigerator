@@ -1053,7 +1053,7 @@ function displayColumns(board) {
                 var cardTitleSpan = document.createElement('span');
                 cardTitleSpan.textContent = card.title;
                 cardTitleSpan.onclick = function () {
-                    showCardDetailsModal(card);
+                    showCardDetailsModal(card, board.boardId, column.columnId);
                 };
                 cardElement.appendChild(cardTitleSpan);
 
@@ -1092,7 +1092,11 @@ function addComment() {
         return;
     }
 
-    var cardTitle = document.getElementById('card-details-title').textContent;
+    var modal = document.getElementById('card-details-modal');
+    var boardId = modal.dataset.boardId;
+    var columnId = modal.dataset.columnId;
+    var cardId = modal.dataset.cardId;
+
     var commentInput = document.getElementById('comment-input').value;
 
     // 입력값 유효성 검사
@@ -1101,67 +1105,114 @@ function addComment() {
         return;
     }
 
-    // 보드와 카드 찾기
-    var board = boards.find(b => b.columns.some(c => c.cards.some(card => card.title === cardTitle)));
-    if (board) {
-        var column = board.columns.find(col => col.cards.some(card => card.title === cardTitle));
-        var card = column.cards.find(card => card.title === cardTitle);
+    var comment = {
+        content: commentInput
+    };
 
-        if (card) {
-            var boardId = board.boardId;
-            var columnId = column.columnId;
-            var cardId = card.id;
+    $.ajax({
+        url: `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards/${cardId}/comments`,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(comment),
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', auth);
+        },
+        success: function(response) {
+            console.log('Server response:', response);
+            if (response && response.data) {
+                var commentData = response.data;
+                var newComment = {
+                    userName: commentData.userName,
+                    content: commentData.content,
+                    createdAt: commentData.createdAt
+                };
 
-            var comment = {
-                content: commentInput
-            };
+                // 새 댓글을 현재 표시된 댓글 목록의 맨 앞에 추가
+                var commentsContainer = modal.querySelector('#card-comments-list');
+                var commentElement = document.createElement('div');
+                commentElement.classList.add('comment');
+                commentElement.innerHTML = `
+                    <p>${newComment.content}</p>
+                    <span class="comment-username">${newComment.userName}</span>
+                    <span class="comment-timestamp">${new Date(newComment.createdAt).toLocaleString()}</span>
+                `;
+                commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
 
-            $.ajax({
-                url: `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards/${cardId}/comments`,
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(comment),
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('Authorization', auth);
-                },
-                success: function(response) {
-                    console.log('Server response:', response);
-                    if (response && response.data) {
-                        var commentData = response.data;
-                        var newComment = {
-                            userName: commentData.userName,
-                            content: commentData.content,
-                            createdAt: commentData.createdAt
-                        };
+                // 입력 필드 초기화
+                document.getElementById('comment-input').value = '';
 
-                        if (!card.comments) {
-                            card.comments = [];
-                        }
-                        card.comments.unshift(newComment);  // 새 댓글을 배열의 맨 앞에 추가
-
-                        // 새 댓글 추가 후 첫 페이지로 이동
-                        currentPage = 1;
-
-                        displayComments(document.getElementById('card-details-modal'), card.comments, card);
-
-                        document.getElementById('comment-input').value = '';
-                    } else {
-                        console.error('Invalid server response:', response);
-                        alert('서버 응답이 올바르지 않습니다.');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Ajax error:', status, error);
-                    alert('댓글 등록에 실패했습니다. 다시 시도해주세요.');
+                // 댓글 개수가 페이지 크기를 초과하면 마지막 댓글 제거
+                if (commentsContainer.children.length > commentsPerPage) {
+                    commentsContainer.removeChild(commentsContainer.lastChild);
                 }
-            });
+
+                // 페이지네이션 컨트롤 업데이트
+                currentPage = 1; // 새 댓글을 추가했으므로 첫 페이지로 이동
+                fetchComments(boardId, columnId, cardId, currentPage)
+                .then(commentData => {
+                    addPaginationControls(modal, commentData.comments.length, {id: cardId});
+                });
+            } else {
+                console.error('Invalid server response:', response);
+                alert('서버 응답이 올바르지 않습니다.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Ajax error:', status, error);
+            alert('댓글 등록에 실패했습니다. 다시 시도해주세요.');
         }
+    });
+}
+
+function fetchComments(boardId, columnId, cardId, page = 1) {
+    const auth = getToken();
+    if (!auth) {
+        window.location.href = '/users/login-page';
+        return Promise.reject('인증 토큰이 없습니다.');
     }
+
+    const url = `http://localhost:8080/boards/${boardId}/columns/${columnId}/cards/${cardId}/comments?page=${page}`;
+    console.log("Fetching comments from:", url);
+
+    return fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': auth
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('댓글 조회 요청 실패');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Server response:", data);
+        if (data && data.data) {
+            return {
+                comments: data.data,
+                totalComments: data.totalComments || data.data.length, // 서버에서 totalComments를 제공하지 않는 경우 현재 페이지의 댓글 수 사용
+                currentPage: page
+            };
+        } else {
+            console.error('Invalid response data');
+            return { comments: [], totalComments: 0, currentPage: page };
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('댓글 조회에 실패했습니다. 다시 시도해주세요.');
+        return { comments: [], totalComments: 0, currentPage: page };
+    });
 }
 
 
 // 댓글 표시 함수
-function displayComments(container, comments, cardRef) {
+function displayComments(container, commentData, cardRef) {
+    var { comments, totalComments } = commentData;
+    console.log("Displaying comments:", {totalComments, currentPage, commentsPerPage});
+
     var commentsContainer = container.querySelector('#card-comments-list');
     if (!commentsContainer) {
         commentsContainer = document.createElement('div');
@@ -1170,15 +1221,7 @@ function displayComments(container, comments, cardRef) {
     }
     commentsContainer.innerHTML = '';
 
-    // 댓글을 최신순으로 정렬 (가장 최근 댓글이 앞에 오도록)
-    comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    // 현재 페이지의 댓글만 선택
-    const startIndex = (currentPage - 1) * commentsPerPage;
-    const endIndex = startIndex + commentsPerPage;
-    const commentsToShow = comments.slice(startIndex, endIndex);
-
-    commentsToShow.forEach(function (comment) {
+    comments.forEach(function (comment) {
         var commentElement = document.createElement('div');
         commentElement.classList.add('comment');
         commentElement.innerHTML = `
@@ -1192,9 +1235,10 @@ function displayComments(container, comments, cardRef) {
     // 페이지네이션 컨트롤 추가
     addPaginationControls(container, comments.length, cardRef);
 }
+
 //페이지네이션 컨트롤 함수
-function addPaginationControls(container, totalComments, cardRef) {
-    const totalPages = Math.ceil(totalComments / commentsPerPage);
+function addPaginationControls(container, commentsCount, cardRef) {
+    console.log("Adding pagination controls:", {commentsCount, currentPage, commentsPerPage});
 
     let paginationContainer = container.querySelector('#pagination-controls');
     if (!paginationContainer) {
@@ -1204,57 +1248,89 @@ function addPaginationControls(container, totalComments, cardRef) {
     }
     paginationContainer.innerHTML = '';
 
+    // 현재 페이지의 댓글 수가 페이지당 댓글 수와 같으면 다음 페이지가 있을 수 있음
+    const hasNextPage = commentsCount === commentsPerPage;
+
     // 이전 페이지 버튼
     if (currentPage > 1) {
         const prevButton = document.createElement('button');
         prevButton.textContent = '이전';
         prevButton.onclick = () => {
             currentPage--;
-            displayComments(container, cardRef.comments, cardRef);
+            fetchComments(container.dataset.boardId, container.dataset.columnId, cardRef.id, currentPage)
+            .then(commentData => {
+                displayComments(container, commentData, cardRef);
+            });
         };
         paginationContainer.appendChild(prevButton);
     }
 
     // 페이지 번호
     const pageInfo = document.createElement('span');
-    pageInfo.textContent = `${currentPage} / ${totalPages}`;
+    pageInfo.textContent = `${currentPage}`;
     paginationContainer.appendChild(pageInfo);
 
     // 다음 페이지 버튼
-    if (currentPage < totalPages) {
+    if (hasNextPage) {
         const nextButton = document.createElement('button');
         nextButton.textContent = '다음';
         nextButton.onclick = () => {
             currentPage++;
-            displayComments(container, cardRef.comments, cardRef);
+            fetchComments(container.dataset.boardId, container.dataset.columnId, cardRef.id, currentPage)
+            .then(commentData => {
+                displayComments(container, commentData, cardRef);
+            });
         };
         paginationContainer.appendChild(nextButton);
     }
 }
 
+
 // 카드 상세 정보 모달 보이기
-function showCardDetailsModal(card) {
+function showCardDetailsModal(card, boardId, columnId) {
     var modal = document.getElementById('card-details-modal');
+    if (!modal) {
+        console.error('Card details modal not found');
+        return;
+    }
     modal.style.display = 'block';
 
-    // 모달 내용 설정
-    document.getElementById('card-details-title').textContent = card.title;
-    document.getElementById('card-details-content').textContent = card.content;
-    document.getElementById('card-details-assignee').textContent = card.collaborator;
-    document.getElementById('card-details-due-date').textContent = card.deadline;
+    // ID들을 모달의 데이터 속성에 저장
+    modal.dataset.boardId = boardId;
+    modal.dataset.columnId = columnId;
+    modal.dataset.cardId = card.id;
 
-    // 댓글 표시
-    displayComments(modal, card.comments || [], card);
+    // 모달 내용 설정
+    var titleElement = document.getElementById('card-details-title');
+    var contentElement = document.getElementById('card-details-content');
+    var assigneeElement = document.getElementById('card-details-assignee');
+    var dueDateElement = document.getElementById('card-details-due-date');
+
+    if (titleElement) titleElement.textContent = card.title;
+    if (contentElement) contentElement.textContent = card.content;
+    if (assigneeElement) assigneeElement.textContent = card.collaborator;
+    if (dueDateElement) dueDateElement.textContent = card.deadline;
+
+    // 댓글 조회 및 표시
+    currentPage = 1;  // 페이지 번호 초기화
+    fetchComments(boardId, columnId, card.id, currentPage)
+    .then(comments => {
+        displayComments(modal, comments, card);
+    });
 
     // 모달 닫기 버튼 이벤트 설정
     var closeButton = document.getElementById('card-details-close-button');
-    closeButton.onclick = function () {
-        hideCardDetailsModal();
-    };
+    if (closeButton) {
+        closeButton.onclick = function () {
+            hideCardDetailsModal();
+        };
+    }
 
     // 댓글 등록 버튼 이벤트 설정
     var commentButton = document.getElementById('comment-button');
-    commentButton.onclick = addComment;
+    if (commentButton) {
+        commentButton.onclick = addComment;
+    }
 }
 
 // 카드 상세 정보 모달 닫기
