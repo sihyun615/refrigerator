@@ -37,9 +37,14 @@
 
 
 # 📊 ERD DIAGRAM
+![트렐5erd](https://github.com/user-attachments/assets/77863691-a971-4628-8d28-f81a8dbe8c52)
 
 
 <br>
 
 
 # 📝 API 명세서
+![트렐5api1](https://github.com/user-attachments/assets/07cdcef4-2505-4692-be1d-c46c570a2dcd)
+![트렐5api2](https://github.com/user-attachments/assets/af28982f-e0bb-4958-8748-a9bd212d4680)
+![트렐5api3](https://github.com/user-attachments/assets/622cddd7-51e3-4b66-91ce-27a9ef1e722c)
+
