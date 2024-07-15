@@ -257,6 +257,22 @@ body, html {
 #explore-section {
   display: flex;
   justify-content: center; /* 화면 가운데 정렬 */
+  flex-direction: column;
+}
+
+.search-result-box {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 0 1 calc(33.33% - 10px); /* 3열로 표시 */
+  box-sizing: border-box;
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
 }
 
 input#query {
