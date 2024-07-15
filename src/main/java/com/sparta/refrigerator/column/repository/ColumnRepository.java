@@ -20,4 +20,5 @@ public interface ColumnRepository extends JpaRepository<Columns, Long> {
     Long findMaxColumnIndexByBoard(@Param("board") Board board);
 
 
+    Optional<Columns> findByColumnNameAndBoard(String columnName, Board board);
 }

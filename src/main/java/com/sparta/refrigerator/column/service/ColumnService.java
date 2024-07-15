@@ -42,7 +42,7 @@ public class ColumnService {
         }
 
         // 이미 존재하는 컬럼인지 확인
-        if (columnRepository.findByColumnName(requestDto.getColumnName()).isPresent()) {
+        if (columnRepository.findByColumnNameAndBoard(requestDto.getColumnName(),checkBoard).isPresent()) {
             throw new ConflictException("이미 존재하는 컬럼 입니다.");
         }
 
