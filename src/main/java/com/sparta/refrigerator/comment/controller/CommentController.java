@@ -62,13 +62,12 @@ public class CommentController {
     @GetMapping
     public ResponseEntity<DataCommonResponse<List<CommentResponseDto>>> getAllComments(
         @AuthenticationPrincipal UserDetailsImpl userDetails,
-        @PathVariable Long cardId,
-        @RequestParam("page") int page) {
+        @PathVariable Long cardId) {
 
         if (userDetails == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
-        List<CommentResponseDto> comments = commentService.getAllComments(cardId, page, PAGE_SIZE);
+        List<CommentResponseDto> comments = commentService.getAllComments(cardId);
         DataCommonResponse<List<CommentResponseDto>> response = new DataCommonResponse<>(200,
             "댓글 조회 성공", comments);
         return new ResponseEntity<>(response, HttpStatus.OK);
