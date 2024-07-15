@@ -377,10 +377,13 @@ function saveBoardChanges(boardId) {
             // 입력 필드 초기화
             document.getElementById('edit-board-error').textContent = '';
         },
-        error: function (error) {
+        error: function (xhr, status, error) {
             console.error('Error:', error);
-            document.getElementById(
-                'edit-board-error').textContent = '보드 수정 중 오류가 발생했습니다.';
+            if (xhr.status === 403) {
+                alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+            } else {
+                document.getElementById('edit-board-error').textContent = '보드 수정 중 오류가 발생했습니다.';
+            }
         }
     });
 }
@@ -435,7 +438,7 @@ function deleteBoard(boardId) {
         },
         error: function (err) {
             console.error('Error deleting board:', err);
-            alert('보드 삭제 중 오류가 발생했습니다.');
+            alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
         }
     });
 }
@@ -598,7 +601,7 @@ function createColumn() {
             }
         },
         error: function () {
-            alert('컬럼 생성에 실패했습니다. 다시 시도해주세요.');
+            alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
         }
     });
 }
@@ -652,7 +655,7 @@ function deleteColumn(columnId, boardId, columnIndex) {
             }
         },
         error: function() {
-            alert('컬럼 삭제에 실패했습니다. 다시 시도해주세요.');
+            alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
         }
     });
 }
@@ -852,7 +855,7 @@ function saveCardEdit(boardId, columnIndex, cardIndex, cardId) {
         error: function(xhr, status, error) {
             console.error('Error updating card:', error);
             if (xhr.status === 403) {
-                alert('권한이 없습니다. 관리자에게 문의하세요.');
+                alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
             } else {
                 alert('카드 수정에 실패했습니다. 다시 시도해주세요.');
             }
@@ -1476,14 +1479,25 @@ function initializeSortableColumns(boardContent) {
                         });
 
                     if (!response.ok) {
-                        throw new Error('컬럼 이동 요청 실패');
+                        if (response.status === 403) {
+                            alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+                            // 컬럼 위치를 원래대로 되돌리기
+                            board.columns.splice(oldIndex, 0, board.columns.splice(newIndex, 1)[0]);
+                            displayColumns(board);
+                            return;
+                        } else {
+                            throw new Error('컬럼 이동 요청 실패');
+                        }
                     }
 
                     const result = await response.json();
-                    console.log(result.message); // 컬럼 이동되었습니다.
+
                 } catch (error) {
-                    console.error('Error:', error);
-                    // 여기서 오류 메시지를 사용자에게 보여줄 수 있습니다.
+
+                    alert('컬럼 이동 중 오류가 발생했습니다.');
+                    // 컬럼 위치를 원래대로 되돌리기
+                    board.columns.splice(oldIndex, 0, board.columns.splice(newIndex, 1)[0]);
+                    displayColumns(board);
                 }
             }
         },
