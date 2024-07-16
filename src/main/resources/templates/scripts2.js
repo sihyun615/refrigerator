@@ -389,16 +389,20 @@ function saveBoardChanges(boardId) {
     });
 }
 
-// 보드 삭제 버튼 클릭 시 모달 표시
+// 보드 삭제 확인 함수
 function confirmDeleteBoard(boardId) {
-    var modal = document.getElementById('board-delete-modal');
-    modal.style.display = 'block';
-
-    // 확인 버튼 클릭 시
-    var confirmButton = document.getElementById('confirm-delete-button');
-    confirmButton.onclick = function () {
+    const confirmMessage = "삭제하는 경우 연결된 데이터가 전부 삭제됩니다. 정말 삭제하시겠습니까?";
+    if (confirm(confirmMessage)) {
         deleteBoard(boardId);
-    };
+    }
+}
+
+javascriptCopy// 보드 삭제 확인 함수
+function confirmDeleteBoard(boardId) {
+    const confirmMessage = "삭제하는 경우 연결된 데이터가 전부 삭제됩니다. 정말 삭제하시겠습니까?";
+    if (confirm(confirmMessage)) {
+        deleteBoard(boardId);
+    }
 }
 
 // 보드 삭제 함수
@@ -418,12 +422,8 @@ function deleteBoard(boardId) {
         success: function (data) {
             console.log('Board deleted successfully:', data);
 
-            console.log(boardId);
-            console.log(typeof boardId);
             // 보드 배열에서 삭제
-            var boardIndex = boards.findIndex(
-                b => b.boardId === parseInt(boardId, 10));
-            console.log(boardIndex);
+            var boardIndex = boards.findIndex(b => b.boardId === parseInt(boardId, 10));
             if (boardIndex !== -1) {
                 boards.splice(boardIndex, 1);
 
@@ -436,10 +436,16 @@ function deleteBoard(boardId) {
 
             // 삭제 확인 모달 닫기
             hideBoardDeleteModal();
+
+            alert("보드가 성공적으로 삭제되었습니다.");
         },
-        error: function (err) {
-            console.error('Error deleting board:', err);
-            alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+        error: function (xhr, status, error) {
+            console.error('Error deleting board:', error);
+            if (xhr.status === 403) {
+                alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+            } else {
+                alert('보드 삭제 중 오류가 발생했습니다.');
+            }
         }
     });
 }
@@ -613,24 +619,14 @@ function createColumn() {
     });
 }
 
-// 컬럼 삭제 확인 모달 보이기
-function confirmDeleteColumn(columnId, boardId, columnIndex,event) {
+// 컬럼 삭제 확인 함수
+function confirmDeleteColumn(columnId, boardId, columnIndex, event) {
     event.stopPropagation(); // 이벤트 전파 중지
 
-    var modal = document.getElementById('column-delete-modal');
-    modal.style.display = 'block';
-
-    // 확인 버튼에 삭제 동작 설정
-    var confirmButton = document.getElementById('confirm-delete-column-button');
-
-    // 기존 이벤트 리스너 제거
-    var newButton = confirmButton.cloneNode(true);
-    confirmButton.parentNode.replaceChild(newButton, confirmButton);
-
-    // 삭제 동작 설정
-    newButton.addEventListener('click', function () {
-        deleteColumn(columnId, boardId,columnIndex);
-    });
+    const confirmMessage = "삭제하는 경우 연결된 데이터가 전부 삭제됩니다. 정말 삭제하시겠습니까?";
+    if (confirm(confirmMessage)) {
+        deleteColumn(columnId, boardId, columnIndex);
+    }
 }
 
 // 컬럼 삭제 함수
@@ -657,12 +653,15 @@ function deleteColumn(columnId, boardId, columnIndex) {
                 // 보드 다시 표시
                 fetchBoard(boardId);
 
-                // 삭제 확인 모달 닫기
-                hideColumnDeleteModal();
+                alert("컬럼이 성공적으로 삭제되었습니다.");
             }
         },
-        error: function() {
-            alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+        error: function(xhr) {
+            if (xhr.status === 403) {
+                alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+            } else {
+                alert('컬럼 삭제 중 오류가 발생했습니다.');
+            }
         }
     });
 }
@@ -1275,24 +1274,14 @@ function hideCardDetailsModal() {
     modal.style.display = 'none';
 }
 
-// 카드 삭제 확인 모달 보이기
+// 카드 삭제 확인 함수
 function confirmDeleteCard(boardId, columnIndex, cardIndex, event) {
     event.stopPropagation(); // 이벤트 전파 중지
 
-    var modal = document.getElementById('card-delete-modal');
-    modal.style.display = 'block';
-
-    // 확인 버튼에 삭제 동작 설정
-    var confirmButton = document.getElementById('confirm-delete-card-button');
-
-    // 기존 이벤트 리스너 제거
-    var newButton = confirmButton.cloneNode(true);
-    confirmButton.parentNode.replaceChild(newButton, confirmButton);
-
-    // 삭제 동작 설정
-    newButton.addEventListener('click', function () {
+    const confirmMessage = "삭제하는 경우 연결된 데이터가 전부 삭제됩니다. 정말 삭제하시겠습니까?";
+    if (confirm(confirmMessage)) {
         deleteCard(boardId, columnIndex, cardIndex);
-    });
+    }
 }
 
 // 카드 삭제 함수
@@ -1310,26 +1299,27 @@ function deleteCard(boardId, columnIndex, cardIndex) {
 
     if (board && columnIndex !== undefined && cardIndex !== undefined) {
         // AJAX 요청 보내기
-        var xhr = new XMLHttpRequest();
-        xhr.open('DELETE',
-            `/boards/${boardId}/columns/${columnId}/cards/${cardId}`);
-        xhr.setRequestHeader('Authorization', auth);
-
-        xhr.onreadystatechange = function () {
-            if (xhr.status === 200) {
-
+        $.ajax({
+            url: `/boards/${boardId}/columns/${columnId}/cards/${cardId}`,
+            type: 'DELETE',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', auth);
+            },
+            success: function() {
                 // 카드 삭제 성공
                 board.columns[columnIndex].cards.splice(cardIndex, 1);
                 // 다시 보드 표시
                 displayBoard(board);
-                // 삭제 확인 모달 닫기
-                hideCardDeleteModal();
-            } else {
-                // 카드 삭제 실패
-                alert('카드 삭제에 실패했습니다.');
+                alert("카드가 성공적으로 삭제되었습니다.");
+            },
+            error: function(xhr) {
+                if (xhr.status === 403) {
+                    alert('권한에 맞지 않은 사용자는 요청을 진행할 수 없습니다.');
+                } else {
+                    alert('카드 삭제 중 오류가 발생했습니다.');
+                }
             }
-        };
-        xhr.send();
+        });
     }
 }
 
